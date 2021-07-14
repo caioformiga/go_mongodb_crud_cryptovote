@@ -3,13 +3,9 @@ package main
 func main() {
 	/*
 		fmt.Printf("Iniciou chamada a ações de deleção...\n")
-		// cria os parametros do filtro
-		//filter := bson.M{"last_name": "formiga"}
-		filter := bson.M{}
-		controller.DeletarVariosRegistros(filter)
+		bo.LimparDados()
 		fmt.Printf("Finalizou a chamada sem erros fatais!\n")
 	*/
-
 	/*
 		fmt.Printf("Iniciou chamada a ações de busca...\n")
 		// cria os parametros do filtro
@@ -54,11 +50,14 @@ func main() {
 		}
 		fmt.Printf("Finalizou a chamada sem erros fatais!\n")
 	*/
-
 	/*
 		fmt.Printf("Iniciou chamada a ações de criação...\n")
-		// criarUmRegistro()
-		controller.CriarVariosRegistros(2)
+		bo.CarregarDados()
+		fmt.Printf("Finalizou a chamada sem erros fatais!\n")
+	*/
+	/*
+		fmt.Printf("Iniciou chamada a ações de busca...\n")
+		bo.AddDownVote("60ede919eb234e0cd4192e8b")
 		fmt.Printf("Finalizou a chamada sem erros fatais!\n")
 	*/
 }
