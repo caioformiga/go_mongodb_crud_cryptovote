@@ -1,5 +1,11 @@
 package main
 
+import (
+	"fmt"
+
+	"github.com/caioformiga/go_mongodb_crud_cryptovote/bo"
+)
+
 func main() {
 	/*
 		fmt.Printf("Iniciou chamada a ações de deleção...\n")
@@ -55,9 +61,9 @@ func main() {
 		bo.CarregarDados()
 		fmt.Printf("Finalizou a chamada sem erros fatais!\n")
 	*/
-	/*
-		fmt.Printf("Iniciou chamada a ações de busca...\n")
-		bo.AddDownVote("60ede919eb234e0cd4192e8b")
-		fmt.Printf("Finalizou a chamada sem erros fatais!\n")
-	*/
+
+	fmt.Printf("Iniciou chamada a ações de busca...\n")
+	bo.AddDownVote("60ee5bd40dccc77c9488e7d5")
+	fmt.Printf("Finalizou a chamada sem erros fatais!\n")
+
 }
