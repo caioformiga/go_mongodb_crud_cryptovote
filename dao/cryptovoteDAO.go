@@ -13,14 +13,14 @@ import (
 )
 
 // variável usada para recuperar um registro do tipo model.CryptoVote
-var objCryptoVote model.CryptoVote
+var oneCryptoVote model.CryptoVote
 
 // variável usada para recuperar uma array de registro do tipo model.CryptoVote
-var sliceObjCryptoVote []model.CryptoVote
+var manyCryptoVotes []model.CryptoVote
 
 /*
 	Função para criar um registro
-	usa na entrada um model.CryptoVote strcut criado em outra camada
+	usa na entrada um model.CryptoVote struct criado em outra camada
 */
 func CreateCryptoVote(mongodbClient *mongo.Client, CryptoVote model.CryptoVote) (*mongo.InsertOneResult, error) {
 	//criar um contexto com deadline de 10 segundos
@@ -36,7 +36,7 @@ func CreateCryptoVote(mongodbClient *mongo.Client, CryptoVote model.CryptoVote) 
 //Função para deletar
 /*
 	Função para deletar varios registros
-	usa na entrada filter := bson.M{"key": "value"} criado em outra camada
+	usa na entrada filter := bson.M{"symbol": "KLV"}
 */
 func DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.DeleteResult, error) {
 	//criar um contexto com deadline de 10 segundos
@@ -51,8 +51,8 @@ func DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.De
 
 //Função para buscar
 /*
-	Função para buscar um model.CryptoVote
-	usa na entrada filter := bson.M{"key": "value"} criado em outra camada
+	Função para recuperar vários registros de model.CryptoVote
+	usa na entrada filter := bson.M{"symbol": "KLV"}
 */
 func FindOneCryptoVote(mongodbClient *mongo.Client, filter bson.M) (model.CryptoVote, error) {
 	//criar um contexto com deadline de 10 segundos
@@ -61,13 +61,13 @@ func FindOneCryptoVote(mongodbClient *mongo.Client, filter bson.M) (model.Crypto
 
 	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
 
-	err := cryptoVoteCollection.FindOne(mongoContext, filter).Decode(&objCryptoVote)
-	return objCryptoVote, err
+	err := cryptoVoteCollection.FindOne(mongoContext, filter).Decode(&oneCryptoVote)
+	return oneCryptoVote, err
 }
 
 /*
-	Função para buscar vários registros de model.CryptoVote
-	usa na entrada filter := bson.M{"key": "value"} criado em outra camada
+	Função para recuperar vários registros de model.CryptoVote
+	usa na entrada filter := bson.M{"symbol": "KLV"}
 */
 func FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.CryptoVote, error) {
 	//criar um contexto com deadline de 10 segundos
@@ -84,21 +84,21 @@ func FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.Cry
 
 	} else {
 		// se a chamada ao banco estiver ok
-		sliceObjCryptoVote = nil
+		manyCryptoVotes = nil
 		for cursor.Next(mongoContext) {
-			err = cursor.Decode(&objCryptoVote)
-			sliceObjCryptoVote = append(sliceObjCryptoVote, objCryptoVote)
+			err = cursor.Decode(&oneCryptoVote)
+			manyCryptoVotes = append(manyCryptoVotes, oneCryptoVote)
 		}
 	}
-	return sliceObjCryptoVote, err
+	return manyCryptoVotes, err
 }
 
 //Função para atualizar
 /*
 	Função para deletar um registro
-	usa na entrada filter := bson.M{"last_name": "silva"}
+	usa na entrada filter := bson.M{"symbol": "KLV"}
 
-	usa na entrada newData := bson.M{"age": "93"}
+	usa na entrada newData := bson.M{"name": "New Data"}
 */
 func UpdateOneCryptoVote(mongodbClient *mongo.Client, filter bson.M, newData bson.M) (model.CryptoVote, error) {
 	//criar um contexto com deadline de 10 segundos
@@ -117,6 +117,6 @@ func UpdateOneCryptoVote(mongodbClient *mongo.Client, filter bson.M, newData bso
 	}
 
 	updateResult := cryptoVoteCollection.FindOneAndUpdate(mongoContext, filter, newData, &opt)
-	err := updateResult.Decode(&objCryptoVote)
-	return objCryptoVote, err
+	err := updateResult.Decode(&oneCryptoVote)
+	return oneCryptoVote, err
 }
