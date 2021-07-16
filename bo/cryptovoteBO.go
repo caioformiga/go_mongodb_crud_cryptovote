@@ -11,8 +11,22 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func validateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote int) (bool, error) {
+func validateCryptoVote(name string, symbol string, qtd_upvote int, qtd_downvote int) (bool, error) {
 	validate := false
+
+	if len(name) > 0 {
+		validate = true
+	} else {
+		validate = false
+		return validate, errors.New("name não pode ser vazio")
+	}
+
+	if len(symbol) > 0 {
+		validate = true
+	} else {
+		validate = false
+		return validate, errors.New("symbol não pode ser vazio")
+	}
 
 	if qtd_upvote >= 0 {
 		validate = true
@@ -27,11 +41,6 @@ func validateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvot
 		validate = false
 		return validate, errors.New("qtd_upvote não pode ser menor do que zero")
 	}
-
-	validate, err := validateCryptoCurrency(crypto.Name, crypto.Symbol)
-	if err != nil {
-		log.Fatal(err)
-	}
 	return validate, nil
 }
 
@@ -44,9 +53,9 @@ func validateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvot
 	retorno
 	uma model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
-func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote int) (model.CryptoVote, error) {
+func CreateCryptoVote(name string, symbol string, qtd_upvote int, qtd_downvote int) (model.CryptoVote, error) {
 	// usa a função criada no pacote bo
-	_, err := validateCryptoVote(crypto, qtd_upvote, qtd_downvote)
+	_, err := validateCryptoVote(name, symbol, qtd_upvote, qtd_downvote)
 	if err != nil {
 		z := "Problemas na validação de dados da nova CryptoVote: " + err.Error()
 		log.Print(z)
@@ -63,7 +72,8 @@ func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote 
 
 	retrievedCryptoVote := model.CryptoVote{
 		Id:           [12]byte{},
-		Crypto:       crypto,
+		Name:         name,
+		Symbol:       symbol,
 		Qtd_Upvote:   qtd_upvote,
 		Qtd_Downvote: qtd_downvote,
 	}
