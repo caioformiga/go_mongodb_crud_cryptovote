@@ -1,7 +1,7 @@
 package bo
 
 import (
-	"fmt"
+	"errors"
 	"log"
 
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/dao"
@@ -10,77 +10,84 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-const MIN_VOTE int = 0
+func ValidateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote int) (bool, error) {
+	validate := false
 
-var objCryptocurrency model.Cryptocurrency
-var objCryptoVote model.CryptoVote
-
-var sliceCryptoVotes []model.CryptoVote
-
-var sliceCryptocurrencyName = []string{"Bitcoin", "Ethereum", "Tether", "Binance Coin", "Litecoin", "Klever"}
-var sliceCryptocurrencySymbol = []string{"BTC", "ETH", "USDT", "BNB", "LLTC", "KLV"}
-
-func CarregarDados() {
-	if len(sliceCryptocurrencyName) != len(sliceCryptocurrencySymbol) {
-		fmt.Printf("Tamanhos diferentes entre sliceCryptocurrencyName e sliceCryptocurrencySymbol\n")
-		fmt.Printf("Tamanho de sliceCryptocurrencyName = %v\n", len(sliceCryptocurrencyName))
-		fmt.Printf("Tamanho de sliceCryptocurrencySymbol = %v\n", len(sliceCryptocurrencySymbol))
-		log.Fatal()
+	if qtd_upvote >= 0 {
+		validate = true
+	} else {
+		validate = false
+		return validate, errors.New("qtd_upvote não pode ser menor do que zero")
 	}
 
-	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
-	mongodbClient, err := dao.GetMongoClientInstance()
+	if qtd_downvote >= 0 {
+		validate = true
+	} else {
+		validate = false
+		return validate, errors.New("qtd_upvote não pode ser menor do que zero")
+	}
+
+	validate, err := ValidateCryptoCurrency(crypto.Name, crypto.Symbol)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	for i := 0; i < len(sliceCryptocurrencyName); i++ {
-		// usa a função criada no pacote model
-		objCryptocurrency = model.Cryptocurrency{
-			Name:   sliceCryptocurrencyName[i],
-			Symbol: sliceCryptocurrencySymbol[i],
-		}
-
-		objCryptoVote = model.CryptoVote{
-			Id:           [12]byte{},
-			Crypto:       objCryptocurrency,
-			Qtd_Upvote:   0,
-			Qtd_Downvote: 0,
-		}
-
-		// usa a função criada no pacote dao
-		insertResult, err := dao.CreateCryptoVote(mongodbClient, objCryptoVote)
-		if err != nil || insertResult.InsertedID == nil {
-			log.Fatal(err)
-		}
-	}
+	return validate, nil
 }
 
-func LimparDados() {
+func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote int) model.CryptoVote {
+	// usa a função criada no pacote bo
+	_, err := ValidateCryptoVote(crypto, qtd_upvote, qtd_downvote)
+	if err != nil {
+		log.Fatalf("Problemas na validação de dados da nova CryptoCurrency: %v", err)
+	}
+
+	dao.SetCollectioName("cryptovotes")
+
 	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// cria filtro sem parametros para limpar todos os dados
-	filter := bson.M{}
+	objCryptoVote := model.CryptoVote{
+		Id:           [12]byte{},
+		Crypto:       crypto,
+		Qtd_Upvote:   qtd_upvote,
+		Qtd_Downvote: qtd_downvote,
+	}
+
+	// usa a função criada no pacote dao
+	insertResult, err := dao.CreateCryptoVote(mongodbClient, objCryptoVote)
+	if err != nil || insertResult.InsertedID == nil {
+		log.Fatal(err)
+	}
+
+	// cria filtro com id para localizar dado
+	filter := bson.M{"_id": insertResult.InsertedID}
+
+	// usa a função criada no pacote dao
+	savedCryptoVote, err := dao.FindOneCryptoVote(mongodbClient, filter)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// retorna a nova CryptoCurrency salva o banco
+	return savedCryptoVote
+}
+
+func DeleteCryptoVoteByFilter(filter bson.M) int64 {
+	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
+	mongodbClient, err := dao.GetMongoClientInstance()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// usa a função criada no pacote dao
 	deleteResult, err := dao.DeleteManyCryptoVote(mongodbClient, filter)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	if deleteResult.DeletedCount >= 0 {
-		if deleteResult.DeletedCount == 1 {
-			fmt.Printf("Foi removido %d registro\n", deleteResult.DeletedCount)
-		} else {
-			fmt.Printf("Foram removidos %d registros\n", deleteResult.DeletedCount)
-		}
-	} else {
-		fmt.Printf("NENHUM registro foi removido, pois não foi localizado entradas com o filtro %+v\n", filter)
-	}
+	return deleteResult.DeletedCount
 }
 
 func FindByIdHex(idHex string) model.CryptoVote {

@@ -14,11 +14,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const (
-	DB_NAME         = "teste"
-	COLLECTION_NAME = "cryptovotes"
-)
-
 // variável usada para recuperar um registro do tipo model.CryptoVote
 var objCryptoVote model.CryptoVote
 
@@ -34,7 +29,7 @@ func CreateCryptoVote(mongodbClient *mongo.Client, CryptoVote model.CryptoVote) 
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(COLLECTION_NAME)
+	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
 
 	insertResult, err := cryptoVoteCollection.InsertOne(mongoContext, CryptoVote)
 	return insertResult, err
@@ -43,14 +38,14 @@ func CreateCryptoVote(mongodbClient *mongo.Client, CryptoVote model.CryptoVote) 
 //Função para deletar
 /*
 	Função para deletar varios registros
-	c
+	usa na entrada filter := bson.M{"key": "value"} criado em outra camada
 */
 func DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.DeleteResult, error) {
 	//criar um contexto com deadline de 10 segundos
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(COLLECTION_NAME)
+	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
 
 	deleteResult, err := cryptoVoteCollection.DeleteMany(mongoContext, filter)
 	return deleteResult, err
@@ -59,14 +54,14 @@ func DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.De
 //Função para buscar
 /*
 	Função para buscar um model.CryptoVote
-	usa na entrada filter := bson.M{"key": "value"} criado em outra camada
+	usa na entrada string do id
 */
 func FindOneCryptoVoteByIdHex(mongodbClient *mongo.Client, idHex string) (model.CryptoVote, error) {
 	//criar um contexto com deadline de 10 segundos
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(COLLECTION_NAME)
+	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
 
 	// cria os parametros do filtro sem restrições
 	primitiveObjectID, err := primitive.ObjectIDFromHex(idHex)
@@ -88,7 +83,7 @@ func FindOneCryptoVote(mongodbClient *mongo.Client, filter bson.M) (model.Crypto
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(COLLECTION_NAME)
+	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
 
 	err := cryptoVoteCollection.FindOne(mongoContext, filter).Decode(&objCryptoVote)
 	return objCryptoVote, err
@@ -103,7 +98,7 @@ func FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.Cry
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(COLLECTION_NAME)
+	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
 
 	cursor, err := cryptoVoteCollection.Find(mongoContext, filter)
 
@@ -135,7 +130,7 @@ func UpdateOneCryptoVote(mongodbClient *mongo.Client, filter bson.M, newData bso
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(COLLECTION_NAME)
+	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
 
 	//se o documento não exisitr não faz nada
 	//se alterar para true cria um novo documento caso não seja localizado
