@@ -112,7 +112,6 @@ func FindManyCryptoCurrency(mongodbClient *mongo.Client, filter bson.M) ([]model
 		sliceObjCryptoCurrency = nil
 		for cursor.Next(mongoContext) {
 			err = cursor.Decode(&objCryptoCurrency)
-			objCryptoCurrency.IdHex = objCryptoCurrency.Id.Hex()
 			sliceObjCryptoCurrency = append(sliceObjCryptoCurrency, objCryptoCurrency)
 		}
 	}

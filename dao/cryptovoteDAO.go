@@ -87,7 +87,6 @@ func FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.Cry
 		sliceObjCryptoVote = nil
 		for cursor.Next(mongoContext) {
 			err = cursor.Decode(&objCryptoVote)
-			objCryptoVote.IdHex = objCryptoVote.Id.Hex()
 			sliceObjCryptoVote = append(sliceObjCryptoVote, objCryptoVote)
 		}
 	}

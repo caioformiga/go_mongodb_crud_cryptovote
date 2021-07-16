@@ -9,5 +9,4 @@ type CryptoVote struct {
 	Crypto       CryptoCurrency     `bson:"cypto,omitempty"`
 	Qtd_Upvote   int                `bson:"qtd_upvote"`
 	Qtd_Downvote int                `bson:"qtd_downvote"`
-	IdHex        string             `bson:"idHex,omitempty"`
 }
