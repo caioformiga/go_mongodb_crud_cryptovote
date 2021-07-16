@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/model"
@@ -11,7 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // variável usada para recuperar um registro do tipo model.CryptoVote
@@ -52,28 +50,6 @@ func DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.De
 }
 
 //Função para buscar
-/*
-	Função para buscar um model.CryptoVote
-	usa na entrada string do id
-*/
-func FindOneCryptoVoteByIdHex(mongodbClient *mongo.Client, idHex string) (model.CryptoVote, error) {
-	//criar um contexto com deadline de 10 segundos
-	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
-
-	// cria os parametros do filtro sem restrições
-	primitiveObjectID, err := primitive.ObjectIDFromHex(idHex)
-	if err != nil {
-		log.Fatal(err)
-	}
-	filter := bson.M{"_id": primitiveObjectID}
-
-	err = cryptoVoteCollection.FindOne(mongoContext, filter).Decode(&objCryptoVote)
-	return objCryptoVote, err
-}
-
 /*
 	Função para buscar um model.CryptoVote
 	usa na entrada filter := bson.M{"key": "value"} criado em outra camada

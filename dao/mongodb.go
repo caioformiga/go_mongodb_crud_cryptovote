@@ -27,7 +27,7 @@ var mongoOnce sync.Once
 
 var collection_name string = "cryptovotes"
 
-func SetCollectioName(name string) {
+func SetCollectionName(name string) {
 	collection_name = name
 }
 

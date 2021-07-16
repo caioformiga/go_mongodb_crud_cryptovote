@@ -28,7 +28,15 @@ func validateCryptoCurrency(name string, symbol string) (bool, error) {
 	return validate, nil
 }
 
-// Cria no banco uma cryptocurrency e retorna
+/*
+	CreateCryptoCurrency faz a validação das entradas antes de criar uma model.CryptoCurrency
+	entrada
+	name deve ser uma string não nula, teste feito usando len(name) > 0
+	symbol deve ser uma string não nula, teste feito usando len(symbol) > 0
+
+	retorno
+	uma model.CryptoCurrency armazenada no banco, testes realizados como o mongoDB
+*/
 func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
 	// usa a função criada no pacote bo
 	_, err := validateCryptoCurrency(name, symbol)
@@ -36,7 +44,7 @@ func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
 		log.Fatalf("Problemas na validação de dados da nova CryptoCurrency: %v", err)
 	}
 
-	dao.SetCollectioName("cryptocurrencies")
+	dao.SetCollectionName("cryptocurrencies")
 
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
@@ -69,9 +77,16 @@ func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
 	return savedCryptoCurrency
 }
 
-// Remove todas as cryptocurrencies que atenderem ao filtro
-func ReadCryptoCurrencyByFilter(filter bson.M) int64 {
-	dao.SetCollectioName("cryptocurrencies")
+/*
+	RetrieveAllCryptoCurrencyByFilter faz uma busca no banco para recuperar uma coleção de model.CryptoCurrency
+	entrada
+	filter := bson.M{"key": "value"}
+
+	retorno
+	uma coleção de model.CryptoCurrency armazenada no banco, testes realizados como o mongoDB
+*/
+func RetrieveAllCryptoCurrencyByFilter(filter bson.M) []model.CryptoCurrency {
+	dao.SetCollectionName("cryptocurrencies")
 
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
@@ -79,16 +94,23 @@ func ReadCryptoCurrencyByFilter(filter bson.M) int64 {
 		log.Fatal(err)
 	}
 
-	deleteResult, err := dao.DeleteManyCryptoCurrency(mongodbClient, filter)
+	retrievedCryptoCurrencies, err := dao.FindManyCryptoCurrency(mongodbClient, filter)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return deleteResult.DeletedCount
+	return retrievedCryptoCurrencies
 }
 
-// Remove todas as cryptocurrencies que atenderem ao filtro
-func UpdateCryptoCurrencyByFilter(filter bson.M, newData bson.M) []model.CryptoCurrency {
-	dao.SetCollectioName("cryptocurrencies")
+/*
+	UpdateAllCryptoCurrencyByFilter faz uma atualização de todas as model.CryptoCurrency que satisfazem o filtro
+	entrada
+	filter := bson.M{"key": "value"}
+
+	retorno
+	uma coleção de model.CryptoCurrency armazenada no banco, testes realizados como o mongoDB
+*/
+func UpdateAllCryptoCurrencyByFilter(filter bson.M, newData bson.M) []model.CryptoCurrency {
+	dao.SetCollectionName("cryptocurrencies")
 
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
@@ -109,18 +131,25 @@ func UpdateCryptoCurrencyByFilter(filter bson.M, newData bson.M) []model.CryptoC
 		// cria filtro com id para localizar dado
 		idFilter := bson.M{"_id": objCryptoCurrency.Id}
 
-		updatedCryptoCurrency, err := dao.UpdateOneCryptoCurrency(mongodbClient, idFilter, newData)
+		savedCryptoCurrency, err := dao.UpdateOneCryptoCurrency(mongodbClient, idFilter, newData)
 		if err != nil {
 			log.Fatal(err)
 		}
-		updatedCryptoCurrencies = append(updatedCryptoCurrencies, updatedCryptoCurrency)
+		updatedCryptoCurrencies = append(updatedCryptoCurrencies, savedCryptoCurrency)
 	}
 	return updatedCryptoCurrencies
 }
 
-// Remove todas as cryptocurrencies que atenderem ao filtro
-func DeleteCryptoCurrencyByFilter(filter bson.M) int64 {
-	dao.SetCollectioName("cryptocurrencies")
+/*
+	DeleteCryptoCurrencyByFilter faz uma deleção de todas as model.CryptoCurrency que satisfazem o filtro
+	entrada
+	filter := bson.M{"key": "value"}
+
+	retorno
+	a quantidade de model.CryptoCurrency deletadas do banco, testes realizados como o mongoDB
+*/
+func DeleteAllCryptoCurrencyByFilter(filter bson.M) int64 {
+	dao.SetCollectionName("cryptocurrencies")
 
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
