@@ -44,11 +44,12 @@ func validateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvot
 	retorno
 	uma model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
-func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote int) model.CryptoVote {
+func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote int) (model.CryptoVote, error) {
 	// usa a função criada no pacote bo
 	_, err := validateCryptoVote(crypto, qtd_upvote, qtd_downvote)
 	if err != nil {
-		log.Fatalf("Problemas na validação de dados da nova CryptoCurrency: %v", err)
+		z := "Problemas na validação de dados da nova CryptoVote: " + err.Error()
+		log.Print(z)
 	}
 
 	dao.SetCollectionName("cryptovotes")
@@ -56,7 +57,8 @@ func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote 
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		log.Print(z)
 	}
 
 	retrievedCryptoVote := model.CryptoVote{
@@ -69,7 +71,8 @@ func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote 
 	// usa a função criada no pacote dao
 	insertResult, err := dao.CreateCryptoVote(mongodbClient, retrievedCryptoVote)
 	if err != nil || insertResult.InsertedID == nil {
-		log.Fatal(err)
+		z := "Problemas na execução de dao.CreateCryptoVote: " + err.Error()
+		log.Print(z)
 	}
 
 	// cria filtro com id para localizar dado
@@ -78,11 +81,12 @@ func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote 
 	// usa a função criada no pacote dao
 	savedCryptoVote, err := dao.FindOneCryptoVote(mongodbClient, filter)
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas na execução de dao.FindOneCryptoVote: " + err.Error()
+		log.Print(z)
 	}
 
 	// retorna a nova CryptoCurrency salva o banco
-	return savedCryptoVote
+	return savedCryptoVote, err
 }
 
 /*
@@ -93,13 +97,14 @@ func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote 
 	retorno
 	uma coleção de model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
-func RetrieveAllCryptoVoteByFilter(filter bson.M) []model.CryptoVote {
+func RetrieveAllCryptoVoteByFilter(filter bson.M) ([]model.CryptoVote, error) {
 	dao.SetCollectionName("cryptovotes")
 
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		log.Print(z)
 	}
 
 	// usa a função criada no pacote dao
@@ -107,7 +112,7 @@ func RetrieveAllCryptoVoteByFilter(filter bson.M) []model.CryptoVote {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return retrievedCryptoVotes
+	return retrievedCryptoVotes, err
 }
 
 /*
@@ -118,11 +123,12 @@ func RetrieveAllCryptoVoteByFilter(filter bson.M) []model.CryptoVote {
 	retorno
 	uma model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
-func RetrieveOneCryptoVoteById(id string) model.CryptoVote {
+func RetrieveOneCryptoVoteById(id string) (model.CryptoVote, error) {
 	// cria os parametros do filtro sem restrições
 	primitiveObjectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de primitive.ObjectIDFromHex: " + err.Error()
+		log.Print(z)
 	}
 	filter := bson.M{"_id": primitiveObjectID}
 
@@ -131,15 +137,17 @@ func RetrieveOneCryptoVoteById(id string) model.CryptoVote {
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		log.Print(z)
 	}
 
 	// usa a função criada no pacote dao
 	retrievedCryptoVote, err := dao.FindOneCryptoVote(mongodbClient, filter)
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de dao.FindOneCryptoVote: " + err.Error()
+		log.Print(z)
 	}
-	return retrievedCryptoVote
+	return retrievedCryptoVote, err
 }
 
 /*
@@ -150,19 +158,21 @@ func RetrieveOneCryptoVoteById(id string) model.CryptoVote {
 	retorno
 	uma coleção de model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
-func UpdateAllCryptoVoteByFilter(filter bson.M, newData bson.M) []model.CryptoVote {
-	dao.SetCollectionName("cryptocurrencies")
+func UpdateAllCryptoVoteByFilter(filter bson.M, newData bson.M) ([]model.CryptoVote, error) {
+	dao.SetCollectionName("cryptovotes")
 
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		log.Print(z)
 	}
 
 	// usa a função criada no pacote dao
 	retrievedCryptoVotes, err := dao.FindManyCryptoVote(mongodbClient, filter)
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de dao.FindManyCryptoVote: " + err.Error()
+		log.Print(z)
 	}
 
 	var updatedCryptoVotes []model.CryptoVote
@@ -174,11 +184,12 @@ func UpdateAllCryptoVoteByFilter(filter bson.M, newData bson.M) []model.CryptoVo
 
 		savedCryptoVote, err := dao.UpdateOneCryptoVote(mongodbClient, idFilter, newData)
 		if err != nil {
-			log.Fatal(err)
+			z := "Problemas no uso de dao.UpdateOneCryptoVote: " + err.Error()
+			log.Print(z)
 		}
 		updatedCryptoVotes = append(updatedCryptoVotes, savedCryptoVote)
 	}
-	return updatedCryptoVotes
+	return updatedCryptoVotes, err
 }
 
 /*
@@ -189,24 +200,28 @@ func UpdateAllCryptoVoteByFilter(filter bson.M, newData bson.M) []model.CryptoVo
 	retorno
 	a quantidade de model.CryptoVote deletadas do banco, testes realizados como o mongoDB
 */
-func DeleteAllCryptoVoteByFilter(filter bson.M) int64 {
+func DeleteAllCryptoVoteByFilter(filter bson.M) (int64, error) {
+	dao.SetCollectionName("cryptovotes")
+
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		log.Print(z)
 	}
 
 	// usa a função criada no pacote dao
 	deleteResult, err := dao.DeleteManyCryptoVote(mongodbClient, filter)
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de dao.DeleteManyCryptoVote: " + err.Error()
+		log.Print(z)
 	}
-	return deleteResult.DeletedCount
+	return deleteResult.DeletedCount, err
 }
 
 func AddUpVote(id string) {
 	// usa a função criada no arquivo cryptovoteBO.go pacote bo
-	retrievedCryptoVote := RetrieveOneCryptoVoteById(id)
+	retrievedCryptoVote, _ := RetrieveOneCryptoVoteById(id)
 
 	// cria filtro com id para localizar dado
 	filter := bson.M{"_id": retrievedCryptoVote.Id}
@@ -232,7 +247,7 @@ func AddUpVote(id string) {
 
 func AddDownVote(id string) {
 	// usa a função criada no arquivo cryptovoteBO.go pacote bo
-	retrievedCryptoVote := RetrieveOneCryptoVoteById(id)
+	retrievedCryptoVote, _ := RetrieveOneCryptoVoteById(id)
 
 	// cria filtro com id para localizar dado
 	filter := bson.M{"_id": retrievedCryptoVote.Id}

@@ -37,11 +37,12 @@ func validateCryptoCurrency(name string, symbol string) (bool, error) {
 	retorno
 	uma model.CryptoCurrency armazenada no banco, testes realizados como o mongoDB
 */
-func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
+func CreateCryptoCurrency(name string, symbol string) (model.CryptoCurrency, error) {
 	// usa a função criada no pacote bo
 	_, err := validateCryptoCurrency(name, symbol)
 	if err != nil {
-		log.Fatalf("Problemas na validação de dados da nova CryptoCurrency: %v", err)
+		z := "Problemas na validação de dados da nova CryptoCurrency: " + err.Error()
+		log.Print(z)
 	}
 
 	dao.SetCollectionName("cryptocurrencies")
@@ -49,7 +50,8 @@ func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		log.Print(z)
 	}
 
 	objCryptoCurrency := model.CryptoCurrency{
@@ -61,7 +63,8 @@ func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
 	// usa a função criada no pacote dao
 	insertResult, err := dao.CreateCryptoCurrency(mongodbClient, objCryptoCurrency)
 	if err != nil || insertResult.InsertedID == nil {
-		log.Fatal(err)
+		z := "Problemas na execução de dao.CreateCryptoCurrency: " + err.Error()
+		log.Print(z)
 	}
 
 	// cria filtro com id para localizar dado
@@ -70,11 +73,12 @@ func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
 	// usa a função criada no pacote dao
 	savedCryptoCurrency, err := dao.FindOneCryptoCurrency(mongodbClient, filter)
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas na execução de dao.FindOneCryptoCurrency: " + err.Error()
+		log.Print(z)
 	}
 
 	// retorna a nova CryptoCurrency salva o banco
-	return savedCryptoCurrency
+	return savedCryptoCurrency, err
 }
 
 /*
@@ -85,20 +89,22 @@ func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
 	retorno
 	uma coleção de model.CryptoCurrency armazenada no banco, testes realizados como o mongoDB
 */
-func RetrieveAllCryptoCurrencyByFilter(filter bson.M) []model.CryptoCurrency {
+func RetrieveAllCryptoCurrencyByFilter(filter bson.M) ([]model.CryptoCurrency, error) {
 	dao.SetCollectionName("cryptocurrencies")
 
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		log.Print(z)
 	}
 
 	retrievedCryptoCurrencies, err := dao.FindManyCryptoCurrency(mongodbClient, filter)
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas na execução de dao.FindManyCryptoCurrency: " + err.Error()
+		log.Print(z)
 	}
-	return retrievedCryptoCurrencies
+	return retrievedCryptoCurrencies, err
 }
 
 /*
@@ -109,19 +115,21 @@ func RetrieveAllCryptoCurrencyByFilter(filter bson.M) []model.CryptoCurrency {
 	retorno
 	uma coleção de model.CryptoCurrency armazenada no banco, testes realizados como o mongoDB
 */
-func UpdateAllCryptoCurrencyByFilter(filter bson.M, newData bson.M) []model.CryptoCurrency {
+func UpdateAllCryptoCurrencyByFilter(filter bson.M, newData bson.M) ([]model.CryptoCurrency, error) {
 	dao.SetCollectionName("cryptocurrencies")
 
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		log.Print(z)
 	}
 
 	// usa a função criada no pacote dao
 	sliceCryptoCurrency, err := dao.FindManyCryptoCurrency(mongodbClient, filter)
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas na execução de dao.FindManyCryptoCurrency: " + err.Error()
+		log.Print(z)
 	}
 
 	var updatedCryptoCurrencies []model.CryptoCurrency
@@ -133,11 +141,12 @@ func UpdateAllCryptoCurrencyByFilter(filter bson.M, newData bson.M) []model.Cryp
 
 		savedCryptoCurrency, err := dao.UpdateOneCryptoCurrency(mongodbClient, idFilter, newData)
 		if err != nil {
-			log.Fatal(err)
+			z := "Problemas na execução de dao.UpdateOneCryptoCurrency: " + err.Error()
+			log.Print(z)
 		}
 		updatedCryptoCurrencies = append(updatedCryptoCurrencies, savedCryptoCurrency)
 	}
-	return updatedCryptoCurrencies
+	return updatedCryptoCurrencies, err
 }
 
 /*
@@ -148,18 +157,20 @@ func UpdateAllCryptoCurrencyByFilter(filter bson.M, newData bson.M) []model.Cryp
 	retorno
 	a quantidade de model.CryptoCurrency deletadas do banco, testes realizados como o mongoDB
 */
-func DeleteAllCryptoCurrencyByFilter(filter bson.M) int64 {
+func DeleteAllCryptoCurrencyByFilter(filter bson.M) (int64, error) {
 	dao.SetCollectionName("cryptocurrencies")
 
 	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		log.Print(z)
 	}
 
 	deleteResult, err := dao.DeleteManyCryptoCurrency(mongodbClient, filter)
 	if err != nil {
-		log.Fatal(err)
+		z := "Problemas na execução de dao.DeleteManyCryptoCurrency: " + err.Error()
+		log.Print(z)
 	}
-	return deleteResult.DeletedCount
+	return deleteResult.DeletedCount, err
 }
