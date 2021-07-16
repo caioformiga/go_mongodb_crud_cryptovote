@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func ValidateCryptoCurrency(name string, symbol string) (bool, error) {
+func validateCryptoCurrency(name string, symbol string) (bool, error) {
 	validate := false
 
 	if len(name) > 0 {
@@ -31,7 +31,7 @@ func ValidateCryptoCurrency(name string, symbol string) (bool, error) {
 // Cria no banco uma cryptocurrency e retorna
 func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
 	// usa a função criada no pacote bo
-	_, err := ValidateCryptoCurrency(name, symbol)
+	_, err := validateCryptoCurrency(name, symbol)
 	if err != nil {
 		log.Fatalf("Problemas na validação de dados da nova CryptoCurrency: %v", err)
 	}

@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func ValidateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote int) (bool, error) {
+func validateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote int) (bool, error) {
 	validate := false
 
 	if qtd_upvote >= 0 {
@@ -27,7 +27,7 @@ func ValidateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvot
 		return validate, errors.New("qtd_upvote não pode ser menor do que zero")
 	}
 
-	validate, err := ValidateCryptoCurrency(crypto.Name, crypto.Symbol)
+	validate, err := validateCryptoCurrency(crypto.Name, crypto.Symbol)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func ValidateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvot
 
 func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote int) model.CryptoVote {
 	// usa a função criada no pacote bo
-	_, err := ValidateCryptoVote(crypto, qtd_upvote, qtd_downvote)
+	_, err := validateCryptoVote(crypto, qtd_upvote, qtd_downvote)
 	if err != nil {
 		log.Fatalf("Problemas na validação de dados da nova CryptoCurrency: %v", err)
 	}
