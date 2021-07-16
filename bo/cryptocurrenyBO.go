@@ -30,9 +30,15 @@ func ValidateCryptoCurrency(name string, symbol string) (bool, error) {
 
 // Cria no banco uma cryptocurrency e retorna
 func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
+	// usa a função criada no pacote bo
+	_, err := ValidateCryptoCurrency(name, symbol)
+	if err != nil {
+		log.Fatalf("Problemas na validação de dados da nova CryptoCurrency: %v", err)
+	}
+
 	dao.SetCollectioName("cryptocurrencies")
 
-	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
+	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
 		log.Fatal(err)
@@ -67,7 +73,7 @@ func CreateCryptoCurrency(name string, symbol string) model.CryptoCurrency {
 func ReadCryptoCurrencyByFilter(filter bson.M) int64 {
 	dao.SetCollectioName("cryptocurrencies")
 
-	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
+	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
 		log.Fatal(err)
@@ -84,7 +90,7 @@ func ReadCryptoCurrencyByFilter(filter bson.M) int64 {
 func UpdateCryptoCurrencyByFilter(filter bson.M, newData bson.M) []model.CryptoCurrency {
 	dao.SetCollectioName("cryptocurrencies")
 
-	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
+	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
 		log.Fatal(err)
@@ -116,7 +122,7 @@ func UpdateCryptoCurrencyByFilter(filter bson.M, newData bson.M) []model.CryptoC
 func DeleteCryptoCurrencyByFilter(filter bson.M) int64 {
 	dao.SetCollectioName("cryptocurrencies")
 
-	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
+	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
 		log.Fatal(err)

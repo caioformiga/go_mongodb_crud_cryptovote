@@ -43,7 +43,7 @@ func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote 
 
 	dao.SetCollectioName("cryptovotes")
 
-	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
+	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
 		log.Fatal(err)
@@ -76,7 +76,7 @@ func CreateCryptoVote(crypto model.CryptoCurrency, qtd_upvote int, qtd_downvote 
 }
 
 func DeleteCryptoVoteByFilter(filter bson.M) int64 {
-	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
+	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
 		log.Fatal(err)
@@ -91,7 +91,7 @@ func DeleteCryptoVoteByFilter(filter bson.M) int64 {
 }
 
 func FindByIdHex(idHex string) model.CryptoVote {
-	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
+	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
 		log.Fatal(err)
@@ -119,7 +119,7 @@ func AddUpVote(idHex string) {
 		"$set": bson.M{"qtd_upvote": qtdNova},
 	}
 
-	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
+	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
 		log.Fatal(err)
@@ -145,7 +145,7 @@ func AddDownVote(idHex string) {
 		"$set": bson.M{"qtd_downvote": qtdNova},
 	}
 
-	// usa a função criada no arquivo mongodb.go pacote main (raiz) do projeto
+	// usa a função criada no pacote dao
 	mongodbClient, err := dao.GetMongoClientInstance()
 	if err != nil {
 		log.Fatal(err)
