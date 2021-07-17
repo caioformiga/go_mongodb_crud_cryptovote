@@ -54,11 +54,21 @@ func validateCryptoVote(name string, symbol string, qtd_upvote int, qtd_downvote
 	uma model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
 func CreateCryptoVote(name string, symbol string, qtd_upvote int, qtd_downvote int) (model.CryptoVote, error) {
+	retrievedCryptoVote := model.CryptoVote{
+		Name:         name,
+		Symbol:       symbol,
+		Qtd_Upvote:   qtd_upvote,
+		Qtd_Downvote: qtd_downvote,
+	}
+
 	// usa a função criada no pacote bo
 	_, err := validateCryptoVote(name, symbol, qtd_upvote, qtd_downvote)
 	if err != nil {
 		z := "Problemas na validação de dados da nova CryptoVote: " + err.Error()
 		log.Print(z)
+		return retrievedCryptoVote, err
+	} else {
+		retrievedCryptoVote.Id = [12]byte{}
 	}
 
 	dao.SetCollectionName("cryptovotes")
@@ -68,14 +78,6 @@ func CreateCryptoVote(name string, symbol string, qtd_upvote int, qtd_downvote i
 	if err != nil {
 		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
 		log.Print(z)
-	}
-
-	retrievedCryptoVote := model.CryptoVote{
-		Id:           [12]byte{},
-		Name:         name,
-		Symbol:       symbol,
-		Qtd_Upvote:   qtd_upvote,
-		Qtd_Downvote: qtd_downvote,
 	}
 
 	// usa a função criada no pacote dao
