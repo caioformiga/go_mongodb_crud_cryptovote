@@ -45,32 +45,40 @@ func validateCryptoVote(name string, symbol string, qtd_upvote int, qtd_downvote
 }
 
 /*
-	CreateCryptoVote faz a validação das entradas antes de criar uma model.CryptoVote
-	entrada
-	qtd_upvote deve ser >= 0
-	qtd_downvote deve ser >= 0
-
-	retorno
-	uma model.CryptoVote armazenada no banco, testes realizados como o mongoDB
+	ValidateCryptoVoteData recebe os campos e faz a validação
+	name : não pode ser vazio, len(name) > 0
+	symbol : não pode ser vazio, len(name) > 0
+	qtd_upvote : não pode ser menor do que zero, qtd_upvote >= 0
+	qtd_downvote : não pode ser menor do que zero, qtd_upvote >= 0
 */
-func CreateCryptoVote(name string, symbol string, qtd_upvote int, qtd_downvote int) (model.CryptoVote, error) {
-	retrievedCryptoVote := model.CryptoVote{
+func ValidateCryptoVoteData(name string, symbol string, qtd_upvote int, qtd_downvote int) (model.CryptoVote, error) {
+	var validatedCryptoVote = model.CryptoVote{
 		Name:         name,
 		Symbol:       symbol,
 		Qtd_Upvote:   qtd_upvote,
 		Qtd_Downvote: qtd_downvote,
 	}
-
 	// usa a função criada no pacote bo
 	_, err := validateCryptoVote(name, symbol, qtd_upvote, qtd_downvote)
 	if err != nil {
 		z := "Problemas na validação de dados da nova CryptoVote: " + err.Error()
 		log.Print(z)
-		return retrievedCryptoVote, err
+		return validatedCryptoVote, err
 	} else {
-		retrievedCryptoVote.Id = [12]byte{}
+		validatedCryptoVote.Id = [12]byte{}
 	}
+	return validatedCryptoVote, err
+}
 
+/*
+	CreateCryptoVote não faz a validação das entradas antes de criar uma model.CryptoVote no banco
+	entrada
+	validatedCryptoVote model.CryptoVote
+
+	retorno
+	uma model.CryptoVote armazenada no banco, testes realizados como o mongoDB
+*/
+func CreateCryptoVote(validatedCryptoVote model.CryptoVote) (model.CryptoVote, error) {
 	dao.SetCollectionName("cryptovotes")
 
 	// usa a função criada no pacote dao
@@ -81,7 +89,7 @@ func CreateCryptoVote(name string, symbol string, qtd_upvote int, qtd_downvote i
 	}
 
 	// usa a função criada no pacote dao
-	insertResult, err := dao.CreateCryptoVote(mongodbClient, retrievedCryptoVote)
+	insertResult, err := dao.CreateCryptoVote(mongodbClient, validatedCryptoVote)
 	if err != nil || insertResult.InsertedID == nil {
 		z := "Problemas na execução de dao.CreateCryptoVote: " + err.Error()
 		log.Print(z)
