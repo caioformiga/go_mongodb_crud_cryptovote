@@ -11,31 +11,31 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func validateCryptoVote(name string, symbol string, qtd_upvote int, qtd_downvote int) (bool, error) {
+func validateCryptoVoteArguments(crypto model.CryptoVote) (bool, error) {
 	validate := false
 
-	if len(name) > 0 {
+	if len(crypto.Name) > 0 {
 		validate = true
 	} else {
 		validate = false
 		return validate, errors.New("name não pode ser vazio")
 	}
 
-	if len(symbol) > 0 {
+	if len(crypto.Symbol) > 0 {
 		validate = true
 	} else {
 		validate = false
 		return validate, errors.New("symbol não pode ser vazio")
 	}
 
-	if qtd_upvote >= 0 {
+	if crypto.Qtd_Upvote >= 0 {
 		validate = true
 	} else {
 		validate = false
 		return validate, errors.New("qtd_upvote não pode ser menor do que zero")
 	}
 
-	if qtd_downvote >= 0 {
+	if crypto.Qtd_Downvote >= 0 {
 		validate = true
 	} else {
 		validate = false
@@ -45,29 +45,74 @@ func validateCryptoVote(name string, symbol string, qtd_upvote int, qtd_downvote
 }
 
 /*
-	ValidateCryptoVoteData recebe os campos e faz a validação
+	validateCryptoVoteUniqueData verifica se não existe no banco alguma CryptoVote que
+	não atente aos critérios de unique abaixo
+	name : unique
+	symbol : unique
+*/
+func validateCryptoVoteUniqueData(crypto model.CryptoVote) (bool, error) {
+	var validate bool = true
+	var retrievedCryptoVotes []model.CryptoVote
+
+	dao.SetCollectionName("cryptovotes")
+
+	// usa a função criada no pacote dao
+	mongodbClient, err := dao.GetMongoClientInstance()
+	if err != nil {
+		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		log.Print(z)
+	}
+
+	// usa a função criada no pacote dao
+	retrievedCryptoVotes, err = dao.FindManyCryptoVote(mongodbClient, bson.M{"name": crypto.Name})
+	if err != nil {
+		z := "Problemas no uso de FindManyCryptoVote: " + err.Error()
+		log.Print(z)
+	}
+
+	if retrievedCryptoVotes != nil {
+		validate = false
+		return validate, errors.New("name informado já exite, escolha outro")
+	}
+
+	// usa a função criada no pacote dao
+	retrievedCryptoVotes, err = dao.FindManyCryptoVote(mongodbClient, bson.M{"symbol": crypto.Symbol})
+	if err != nil {
+		z := "Problemas no uso de FindManyCryptoVote: " + err.Error()
+		log.Print(z)
+	}
+
+	if retrievedCryptoVotes != nil {
+		validate = false
+		return validate, errors.New("symbol informado já exite, escolha outro")
+	}
+	return validate, err
+}
+
+/*
+	ValidateCryptoVote recebe os campos e faz a validação
 	name : não pode ser vazio, len(name) > 0
 	symbol : não pode ser vazio, len(name) > 0
 	qtd_upvote : não pode ser menor do que zero, qtd_upvote >= 0
 	qtd_downvote : não pode ser menor do que zero, qtd_upvote >= 0
 */
-func ValidateCryptoVoteData(name string, symbol string, qtd_upvote int, qtd_downvote int) (model.CryptoVote, error) {
-	var validatedCryptoVote = model.CryptoVote{
-		Name:         name,
-		Symbol:       symbol,
-		Qtd_Upvote:   qtd_upvote,
-		Qtd_Downvote: qtd_downvote,
-	}
+func ValidateCryptoVote(crypto model.CryptoVote) (model.CryptoVote, error) {
 	// usa a função criada no pacote bo
-	_, err := validateCryptoVote(name, symbol, qtd_upvote, qtd_downvote)
+	_, err := validateCryptoVoteArguments(crypto)
 	if err != nil {
 		z := "Problemas na validação de dados da nova CryptoVote: " + err.Error()
 		log.Print(z)
-		return validatedCryptoVote, err
+		return crypto, err
 	} else {
-		validatedCryptoVote.Id = [12]byte{}
+		// usa a função criada no pacote bo
+		_, err = validateCryptoVoteUniqueData(crypto)
+		if err != nil {
+			z := "Problemas na validação unique da nova CryptoVote: " + err.Error()
+			log.Print(z)
+			return crypto, err
+		}
 	}
-	return validatedCryptoVote, err
+	return crypto, err
 }
 
 /*
@@ -79,6 +124,7 @@ func ValidateCryptoVoteData(name string, symbol string, qtd_upvote int, qtd_down
 	uma model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
 func CreateCryptoVote(validatedCryptoVote model.CryptoVote) (model.CryptoVote, error) {
+
 	dao.SetCollectionName("cryptovotes")
 
 	// usa a função criada no pacote dao
