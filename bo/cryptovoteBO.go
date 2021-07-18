@@ -282,6 +282,8 @@ func UpdateAllCryptoVoteByFilter(filter bson.M, newData bson.M) ([]model.CryptoV
 	uma coleção de model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
 func UpdateOneCryptoVoteByFilter(filter bson.M, newData bson.M) (model.CryptoVote, error) {
+	var retrievedCryptoVote model.CryptoVote
+
 	dao.SetCollectionName("cryptovotes")
 
 	// usa a função criada no pacote dao
@@ -292,20 +294,22 @@ func UpdateOneCryptoVoteByFilter(filter bson.M, newData bson.M) (model.CryptoVot
 	}
 
 	// usa a função criada no pacote dao
-	retrievedCryptoVote, err := dao.FindOneCryptoVote(mongodbClient, filter)
+	retrievedCryptoVote, err = dao.FindOneCryptoVote(mongodbClient, filter)
 	if err != nil {
 		z := "Problemas no uso de dao.FindOneCryptoVote: " + err.Error()
 		log.Print(z)
 	}
 
-	idFilter := bson.M{"_id": retrievedCryptoVote.Id}
+	if !retrievedCryptoVote.Id.IsZero() {
+		idFilter := bson.M{"_id": retrievedCryptoVote.Id}
 
-	savedCryptoVote, err := dao.UpdateOneCryptoVote(mongodbClient, idFilter, newData)
-	if err != nil {
-		z := "Problemas no uso de dao.UpdateOneCryptoVote: " + err.Error()
-		log.Print(z)
+		retrievedCryptoVote, err = dao.UpdateOneCryptoVote(mongodbClient, idFilter, newData)
+		if err != nil {
+			z := "Problemas no uso de dao.UpdateOneCryptoVote: " + err.Error()
+			log.Print(z)
+		}
 	}
-	return savedCryptoVote, err
+	return retrievedCryptoVote, err
 }
 
 /*
