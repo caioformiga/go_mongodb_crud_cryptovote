@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -55,17 +54,17 @@ func connect() (*mongo.Client, error) {
 	//conecta no MongoDB
 	mongoClient, err := mongo.Connect(mongoContext, mongoOptions)
 	if err != nil {
-		fmt.Println("Erro na conexão, ver: mongo.Connect(mongoContext, client_mongo)")
+		log.Println("[dao.mongodb.go] Erro na conexão, ver: mongo.Connect(mongoContext, client_mongo)")
 	}
-	fmt.Println("Conexão com mongoDB foi feita com sucesso...")
+	log.Println("[dao.mongodb.go] Conexão com mongoDB foi feita com sucesso...")
 
 	//verifica a conexão
 	err = mongoClient.Ping(mongoContext, readpref.Primary())
 	if err != nil {
-		fmt.Println("Perdeu a conexão, ver: mongoClient.Ping(mongoContext, readpref.Primary())")
+		log.Println("[dao.mongodb.go] Perdeu a conexão, ver: mongoClient.Ping(mongoContext, readpref.Primary())")
 		diconnect(mongoClient)
 	}
-	fmt.Println("Ping feito com sucesso!")
+	log.Println("[dao.mongodb.go] Ping feito com sucesso!")
 	return mongoClient, err
 }
 
@@ -77,7 +76,7 @@ func diconnect(mongoClient *mongo.Client) {
 	//fechar a conexão
 	err := mongoClient.Disconnect(mongoContext)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("[dao.mongodb.go] +%v", err)
 	}
-	fmt.Println("Fechando a conexão com mongoDB")
+	log.Println("[dao.mongodb.go] Fechando a conexão com mongoDB")
 }
