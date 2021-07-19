@@ -11,14 +11,14 @@ import (
 )
 
 /*
-	CreateCryptoVote não faz a validação das entradas antes de criar uma model.CryptoVote no banco
+	CreateCryptoVote faz a validação das entradas antes de criar uma model.CryptoVote no banco
 	entrada
 	validatedCryptoVote model.CryptoVote
 
 	retorno
 	uma model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
-func CreateCryptoVote(validatedCryptoVote model.CryptoVote) (model.CryptoVote, error) {
+func CreateCryptoVote(cryptoVote model.CryptoVote) (model.CryptoVote, error) {
 
 	dao.SetCollectionName("cryptovotes")
 
@@ -29,25 +29,31 @@ func CreateCryptoVote(validatedCryptoVote model.CryptoVote) (model.CryptoVote, e
 		log.Print(z)
 	}
 
-	// usa a função criada no pacote dao
-	insertResult, err := dao.CreateCryptoVote(mongodbClient, validatedCryptoVote)
-	if err != nil || insertResult.InsertedID == nil {
-		z := "Problemas na execução de dao.CreateCryptoVote: " + err.Error()
-		log.Print(z)
+	// usa a função criada no pacote bo
+	validate, err := ValidateCryptoVote(cryptoVote)
+
+	if !validate {
+		return cryptoVote, err
+	} else {
+		// usa a função criada no pacote dao
+		insertResult, err := dao.CreateCryptoVote(mongodbClient, cryptoVote)
+		if err != nil || insertResult.InsertedID == nil {
+			z := "Problemas na execução de dao.CreateCryptoVote: " + err.Error()
+			log.Print(z)
+		}
+
+		// cria filtro com id para localizar dado
+		filter := bson.M{"_id": insertResult.InsertedID}
+
+		// usa a função criada no pacote dao
+		cryptoVote, err = dao.FindOneCryptoVote(mongodbClient, filter)
+		if err != nil {
+			z := "Problemas na execução de dao.FindOneCryptoVote: " + err.Error()
+			log.Print(z)
+		}
 	}
-
-	// cria filtro com id para localizar dado
-	filter := bson.M{"_id": insertResult.InsertedID}
-
-	// usa a função criada no pacote dao
-	savedCryptoVote, err := dao.FindOneCryptoVote(mongodbClient, filter)
-	if err != nil {
-		z := "Problemas na execução de dao.FindOneCryptoVote: " + err.Error()
-		log.Print(z)
-	}
-
-	// retorna a nova CryptoCurrency salva o banco
-	return savedCryptoVote, err
+	// retorna a nova CryptoCurrency salva no banco
+	return cryptoVote, err
 }
 
 /*
