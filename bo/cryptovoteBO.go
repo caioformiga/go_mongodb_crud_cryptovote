@@ -268,8 +268,8 @@ func AddDownVote(name string, symbol string) (model.CryptoVote, error) {
 	}
 
 	if !cryptoVote.Id.IsZero() {
-		// soma valor atual de Qtd_Upvote +1
-		newQtd := cryptoVote.Qtd_Upvote + 1
+		// soma valor atual de Qtd_Downvote +1
+		newQtd := cryptoVote.Qtd_Downvote + 1
 
 		typeVote := "qtd_downvote"
 
