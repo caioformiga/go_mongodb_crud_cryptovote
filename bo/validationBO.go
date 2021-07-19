@@ -108,9 +108,7 @@ func ValidateCryptoVoteUniqueData(name string, symbol string) (bool, error) {
 	// se não for vazio
 	if len(symbol) > 0 {
 		validate, err = validateCryptoVoteUniqueSymbol(symbol)
-
 		if !validate {
-			err := errors.New("problemas na validação (validateCryptoVoteUniqueSymbol)")
 			return validate, err
 		}
 	}
