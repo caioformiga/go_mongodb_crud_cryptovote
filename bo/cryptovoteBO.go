@@ -122,13 +122,13 @@ func RetrieveOneCryptoVote(name string, symbol string) (model.CryptoVote, error)
 	}
 
 	// usa a função criada no pacote dao
-	retrievedCryptoVote, err := dao.FindOneCryptoVote(mongodbClient, filter)
+	cryptoVote, err = dao.FindOneCryptoVote(mongodbClient, filter)
 	if err != nil {
 		z := "Problemas no uso de dao.FindOneCryptoVote: " + err.Error()
 		log.Print(z)
 		return cryptoVote, err
 	}
-	return retrievedCryptoVote, err
+	return cryptoVote, err
 }
 
 /*
@@ -233,24 +233,22 @@ func DeleteAllCryptoVoteByFilter(filter bson.M) (int64, error) {
 	nil se não tiver problema ou erro caso contrário
 */
 func AddUpVote(name string, symbol string) (model.CryptoVote, error) {
-	var retrievedCryptoVote model.CryptoVote
-
 	// usa a função criada no arquivo cryptovoteBO.go pacote bo
-	retrievedCryptoVote, err := RetrieveOneCryptoVote(name, symbol)
+	cryptoVote, err := RetrieveOneCryptoVote(name, symbol)
 	if err != nil {
 		z := "Problemas no uso de RetrieveOneCryptoVote: " + err.Error()
 		log.Print(z)
 	}
 
-	if !retrievedCryptoVote.Id.IsZero() {
+	if !cryptoVote.Id.IsZero() {
 		// soma valor atual de Qtd_Upvote +1
-		newQtd := retrievedCryptoVote.Qtd_Upvote + 1
+		newQtd := cryptoVote.Qtd_Upvote + 1
 
 		typeVote := "qtd_upvote"
 
-		retrievedCryptoVote, err = updateVote(retrievedCryptoVote, typeVote, newQtd)
+		cryptoVote, err = updateVote(cryptoVote, typeVote, newQtd)
 	}
-	return retrievedCryptoVote, err
+	return cryptoVote, err
 }
 
 /*
@@ -262,24 +260,22 @@ func AddUpVote(name string, symbol string) (model.CryptoVote, error) {
 	nil se não tiver problema ou erro caso contrário
 */
 func AddDownVote(name string, symbol string) (model.CryptoVote, error) {
-	var retrievedCryptoVote model.CryptoVote
-
 	// usa a função criada no arquivo cryptovoteBO.go pacote bo
-	retrievedCryptoVote, err := RetrieveOneCryptoVote(name, symbol)
+	cryptoVote, err := RetrieveOneCryptoVote(name, symbol)
 	if err != nil {
 		z := "Problemas no uso de UpdateAllCryptoVoteByFilter: " + err.Error()
 		log.Print(z)
 	}
 
-	if !retrievedCryptoVote.Id.IsZero() {
+	if !cryptoVote.Id.IsZero() {
 		// soma valor atual de Qtd_Upvote +1
-		newQtd := retrievedCryptoVote.Qtd_Upvote + 1
+		newQtd := cryptoVote.Qtd_Upvote + 1
 
 		typeVote := "qtd_downvote"
 
-		retrievedCryptoVote, err = updateVote(retrievedCryptoVote, typeVote, newQtd)
+		cryptoVote, err = updateVote(cryptoVote, typeVote, newQtd)
 	}
-	return retrievedCryptoVote, err
+	return cryptoVote, err
 }
 
 func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd int) (model.CryptoVote, error) {
