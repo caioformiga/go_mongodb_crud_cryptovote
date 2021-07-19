@@ -46,7 +46,7 @@ func ValidateCryptoVoteArguments(crypto model.CryptoVote) (bool, error) {
 		validate = true
 	} else {
 		validate = false
-		return validate, errors.New("name não pode ter mais do que 6 caracteres")
+		return validate, errors.New("symbol não pode ter mais do que 6 caracteres")
 	}
 
 	if crypto.Qtd_Upvote >= 0 {
