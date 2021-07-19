@@ -2,6 +2,7 @@ package bo
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"strings"
 
@@ -147,7 +148,7 @@ func RetrieveOneCryptoVote(name string, symbol string) (model.CryptoVote, error)
 	uma coleção de model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
 func UpdateOneCryptoVoteByFilter(filter bson.M, cryptoNewData model.CryptoVote) (model.CryptoVote, error) {
-	var retrievedCryptoVote model.CryptoVote
+	var retrievedCryptoVote model.CryptoVote = model.CryptoVote{}
 
 	dao.SetCollectionName("cryptovotes")
 
@@ -158,45 +159,54 @@ func UpdateOneCryptoVoteByFilter(filter bson.M, cryptoNewData model.CryptoVote) 
 		log.Print(z)
 	}
 
-	// usa a função criada no pacote dao
-	retrievedCryptoVote, err = dao.FindOneCryptoVote(mongodbClient, filter)
-	if err != nil {
-		z := "Problemas no uso de dao.FindOneCryptoVote: " + err.Error()
-		log.Print(z)
+	// se ambos os dados forem vazio não pode alterar pois vai ficar com os campos nulo
+	validate := true
+	if len(cryptoNewData.Name) <= 0 && len(cryptoNewData.Symbol) <= 0 {
+		validate = false
+		err = errors.New("[cryptovote.validationBO] um dos campos (name e symbol) precisa ser diferente de nulo")
+	} else {
+		// usa a função criada no pacote bo
+		validate, err = ValidateCryptoVoteUniqueData(cryptoNewData.Name, cryptoNewData.Symbol)
 	}
 
-	// usa a função criada no pacote bo
-	validate, err := ValidateCryptoVoteUniqueData(cryptoNewData.Name, cryptoNewData.Symbol)
-
-	if !retrievedCryptoVote.Id.IsZero() && validate {
-		// caso os novos dados respeitem as regras de validateCryptoVoteUniqueData
-		// realiza a atualização
-		idFilter := bson.M{"_id": retrievedCryptoVote.Id}
-
-		// convertendo de model.CryptoVote para json
-		jsonData, err := json.Marshal(cryptoNewData)
+	if validate {
+		// usa a função criada no pacote dao
+		retrievedCryptoVote, err = dao.FindOneCryptoVote(mongodbClient, filter)
 		if err != nil {
-			z := "Problemas no Marshal: " + err.Error()
+			z := "Problemas no uso de dao.FindOneCryptoVote: " + err.Error()
 			log.Print(z)
 		}
 
-		// convertendo de json para bson
-		bsonCryptoNewData := bson.M{}
-		err = json.Unmarshal(jsonData, &bsonCryptoNewData)
-		if err != nil {
-			z := "Problemas no Unmarshal: " + err.Error()
-			log.Print(z)
-		}
+		if !retrievedCryptoVote.Id.IsZero() {
+			// caso os novos dados respeitem as regras de validateCryptoVoteUniqueData
+			// realiza a atualização
+			idFilter := bson.M{"_id": retrievedCryptoVote.Id}
 
-		newData := bson.M{
-			"$set": bsonCryptoNewData,
-		}
+			// convertendo de model.CryptoVote para json
+			jsonData, err := json.Marshal(cryptoNewData)
+			if err != nil {
+				z := "Problemas no Marshal: " + err.Error()
+				log.Print(z)
+			}
 
-		// atualização
-		retrievedCryptoVote, err = dao.UpdateOneCryptoVote(mongodbClient, idFilter, newData)
-		if err != nil {
-			z := "Problemas no uso de dao.UpdateOneCryptoVote: " + err.Error()
-			log.Print(z)
+			// convertendo de json para bson
+			bsonCryptoNewData := bson.M{}
+			err = json.Unmarshal(jsonData, &bsonCryptoNewData)
+			if err != nil {
+				z := "Problemas no Unmarshal: " + err.Error()
+				log.Print(z)
+			}
+
+			newData := bson.M{
+				"$set": bsonCryptoNewData,
+			}
+
+			// atualização
+			retrievedCryptoVote, err = dao.UpdateOneCryptoVote(mongodbClient, idFilter, newData)
+			if err != nil {
+				z := "Problemas no uso de dao.UpdateOneCryptoVote: " + err.Error()
+				log.Print(z)
+			}
 		}
 	}
 	return retrievedCryptoVote, err

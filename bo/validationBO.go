@@ -25,42 +25,42 @@ func ValidateCryptoVoteArguments(crypto model.CryptoVote) (bool, error) {
 		validate = true
 	} else {
 		validate = false
-		return validate, errors.New("name não pode ser vazio")
+		return validate, errors.New("[cryptovote.validationBO] name não pode ser vazio")
 	}
 
 	if len(crypto.Name) < 30 {
 		validate = true
 	} else {
 		validate = false
-		return validate, errors.New("name não pode ter maior do que 30 caracteres")
+		return validate, errors.New("[cryptovote.validationBO] name não pode ter maior do que 30 caracteres")
 	}
 
 	if len(crypto.Symbol) > 0 {
 		validate = true
 	} else {
 		validate = false
-		return validate, errors.New("symbol não pode ser vazio")
+		return validate, errors.New("[cryptovote.validationBO] symbol não pode ser vazio")
 	}
 
 	if len(crypto.Symbol) < 6 {
 		validate = true
 	} else {
 		validate = false
-		return validate, errors.New("symbol não pode ter mais do que 6 caracteres")
+		return validate, errors.New("[cryptovote.validationBO] symbol não pode ter mais do que 6 caracteres")
 	}
 
 	if crypto.Qtd_Upvote >= 0 {
 		validate = true
 	} else {
 		validate = false
-		return validate, errors.New("qtd_upvote não pode ser menor do que zero")
+		return validate, errors.New("[cryptovote.validationBO] qtd_upvote não pode ser menor do que zero")
 	}
 
 	if crypto.Qtd_Downvote >= 0 {
 		validate = true
 	} else {
 		validate = false
-		return validate, errors.New("qtd_downvote não pode ser menor do que zero")
+		return validate, errors.New("[cryptovote.validationBO] qtd_downvote não pode ser menor do que zero")
 	}
 	return validate, nil
 }
@@ -87,7 +87,7 @@ func validateUnique(key string, value string) (bool, error) {
 
 	if retrievedCryptoVotes != nil {
 		validate = false
-		return validate, errors.New("campo(" + key + ") informado já exite, escolha outro diferente de " + value)
+		return validate, errors.New("[cryptovote.validationBO] campo(" + key + ") informado já exite, escolha outro diferente de " + value)
 	}
 	return validate, err
 }
@@ -111,6 +111,7 @@ func validateCryptoVoteUniqueName(value string) (bool, error) {
 func ValidateCryptoVoteUniqueData(name string, symbol string) (bool, error) {
 	var validate bool = false
 	var err error
+
 	// se não for vazio
 	if len(name) > 0 {
 		validate, err = validateCryptoVoteUniqueName(name)
@@ -146,13 +147,17 @@ func ValidateCryptoVote(crypto model.CryptoVote) (bool, error) {
 		log.Print(z)
 		return validate, err
 	} else {
-		// usa a função criada no pacote bo
-		validate, err = ValidateCryptoVoteUniqueData(crypto.Name, crypto.Symbol)
-		if err != nil {
-			z := "Problemas na validação unique da nova CryptoVote: " + err.Error()
-			log.Print(z)
-			return validate, err
-		}
+		validate = true
+	}
+
+	// usa a função criada no pacote bo
+	validate, err = ValidateCryptoVoteUniqueData(crypto.Name, crypto.Symbol)
+	if err != nil {
+		z := "Problemas na validação unique da nova CryptoVote: " + err.Error()
+		log.Print(z)
+		return validate, err
+	} else {
+		validate = true
 	}
 	return validate, err
 }
