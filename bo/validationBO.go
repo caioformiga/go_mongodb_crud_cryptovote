@@ -28,11 +28,25 @@ func ValidateCryptoVoteArguments(crypto model.CryptoVote) (bool, error) {
 		return validate, errors.New("name não pode ser vazio")
 	}
 
+	if len(crypto.Name) < 30 {
+		validate = true
+	} else {
+		validate = false
+		return validate, errors.New("name não pode ter maior do que 30 caracteres")
+	}
+
 	if len(crypto.Symbol) > 0 {
 		validate = true
 	} else {
 		validate = false
 		return validate, errors.New("symbol não pode ser vazio")
+	}
+
+	if len(crypto.Symbol) < 6 {
+		validate = true
+	} else {
+		validate = false
+		return validate, errors.New("name não pode ter mais do que 6 caracteres")
 	}
 
 	if crypto.Qtd_Upvote >= 0 {

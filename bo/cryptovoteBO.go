@@ -3,6 +3,7 @@ package bo
 import (
 	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/dao"
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/model"
@@ -12,8 +13,10 @@ import (
 
 /*
 	CreateCryptoVote faz a validação das entradas antes de criar uma model.CryptoVote no banco
-	entrada
-	validatedCryptoVote model.CryptoVote
+	entrada cryptoVote.Name
+
+	cryptoVote.Name se "KLevER" salva "Klever"
+	cryptoVote.Symbol se klv salva "KLV"
 
 	retorno
 	uma model.CryptoVote armazenada no banco, testes realizados como o mongoDB
@@ -35,6 +38,10 @@ func CreateCryptoVote(cryptoVote model.CryptoVote) (model.CryptoVote, error) {
 	if !validate {
 		return cryptoVote, err
 	} else {
+
+		cryptoVote.Name = strings.Title(strings.ToLower(strings.TrimSpace(cryptoVote.Name)))
+		cryptoVote.Symbol = strings.ToUpper(strings.TrimSpace(cryptoVote.Symbol))
+
 		// usa a função criada no pacote dao
 		insertResult, err := dao.CreateCryptoVote(mongodbClient, cryptoVote)
 		if err != nil || insertResult.InsertedID == nil {
