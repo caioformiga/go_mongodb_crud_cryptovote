@@ -2,8 +2,6 @@ package bo
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"log"
 
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/dao"
@@ -11,110 +9,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 )
-
-func validateCryptoVoteArguments(crypto model.CryptoVote) (bool, error) {
-	validate := false
-
-	if len(crypto.Name) > 0 {
-		validate = true
-	} else {
-		validate = false
-		return validate, errors.New("name não pode ser vazio")
-	}
-
-	if len(crypto.Symbol) > 0 {
-		validate = true
-	} else {
-		validate = false
-		return validate, errors.New("symbol não pode ser vazio")
-	}
-
-	if crypto.Qtd_Upvote >= 0 {
-		validate = true
-	} else {
-		validate = false
-		return validate, errors.New("qtd_upvote não pode ser menor do que zero")
-	}
-
-	if crypto.Qtd_Downvote >= 0 {
-		validate = true
-	} else {
-		validate = false
-		return validate, errors.New("qtd_upvote não pode ser menor do que zero")
-	}
-	return validate, nil
-}
-
-/*
-	validateCryptoVoteUniqueData verifica se não existe no banco alguma CryptoVote que
-	não atente aos critérios de unique abaixo
-	name : unique
-	symbol : unique
-*/
-func validateCryptoVoteUniqueData(crypto model.CryptoVote) (bool, error) {
-	var validate bool = true
-	var retrievedCryptoVotes []model.CryptoVote
-
-	dao.SetCollectionName("cryptovotes")
-
-	// usa a função criada no pacote dao
-	mongodbClient, err := dao.GetMongoClientInstance()
-	if err != nil {
-		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
-		log.Print(z)
-	}
-
-	// usa a função criada no pacote dao
-	retrievedCryptoVotes, err = dao.FindManyCryptoVote(mongodbClient, bson.M{"name": crypto.Name})
-	if err != nil {
-		z := "Problemas no uso de FindManyCryptoVote: " + err.Error()
-		log.Print(z)
-	}
-
-	if retrievedCryptoVotes != nil {
-		validate = false
-		return validate, errors.New("name informado já exite, escolha outro")
-	}
-
-	// usa a função criada no pacote dao
-	retrievedCryptoVotes, err = dao.FindManyCryptoVote(mongodbClient, bson.M{"symbol": crypto.Symbol})
-	if err != nil {
-		z := "Problemas no uso de FindManyCryptoVote: " + err.Error()
-		log.Print(z)
-	}
-
-	if retrievedCryptoVotes != nil {
-		validate = false
-		return validate, errors.New("symbol informado já exite, escolha outro")
-	}
-	return validate, err
-}
-
-/*
-	ValidateCryptoVote recebe os campos e faz a validação
-	name : não pode ser vazio, len(name) > 0
-	symbol : não pode ser vazio, len(name) > 0
-	qtd_upvote : não pode ser menor do que zero, qtd_upvote >= 0
-	qtd_downvote : não pode ser menor do que zero, qtd_upvote >= 0
-*/
-func ValidateCryptoVote(crypto model.CryptoVote) (model.CryptoVote, error) {
-	// usa a função criada no pacote bo
-	_, err := validateCryptoVoteArguments(crypto)
-	if err != nil {
-		z := "Problemas na validação de dados da nova CryptoVote: " + err.Error()
-		log.Print(z)
-		return crypto, err
-	} else {
-		// usa a função criada no pacote bo
-		_, err = validateCryptoVoteUniqueData(crypto)
-		if err != nil {
-			z := "Problemas na validação unique da nova CryptoVote: " + err.Error()
-			log.Print(z)
-			return crypto, err
-		}
-	}
-	return crypto, err
-}
 
 /*
 	CreateCryptoVote não faz a validação das entradas antes de criar uma model.CryptoVote no banco
@@ -207,7 +101,7 @@ func RetrieveOneCryptoVote(name string, symbol string) (model.CryptoVote, error)
 	filter := bson.M{}
 	err = json.Unmarshal(jsonData, &filter)
 	if err != nil {
-		fmt.Printf("Problemas para fazer Unmarshal de json para bson.M: %v", err)
+		log.Printf("Problemas para fazer Unmarshal de json para bson.M: %v", err)
 		return cryptoVote, err
 	}
 
@@ -232,56 +126,14 @@ func RetrieveOneCryptoVote(name string, symbol string) (model.CryptoVote, error)
 }
 
 /*
-	UpdateAllCryptoVoteByFilter faz uma atualização de todas as model.CryptoVote que satisfazem o filtro
+	UpdateOneCryptoVoteByFilter faz uma atualização de todas as model.CryptoVote que satisfazem o filtro
 	entrada
 	filter := bson.M{"key": "value"}
 
 	retorno
 	uma coleção de model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
-func UpdateAllCryptoVoteByFilter(filter bson.M, newData bson.M) ([]model.CryptoVote, error) {
-	dao.SetCollectionName("cryptovotes")
-
-	// usa a função criada no pacote dao
-	mongodbClient, err := dao.GetMongoClientInstance()
-	if err != nil {
-		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
-		log.Print(z)
-	}
-
-	// usa a função criada no pacote dao
-	retrievedCryptoVotes, err := dao.FindManyCryptoVote(mongodbClient, filter)
-	if err != nil {
-		z := "Problemas no uso de dao.FindManyCryptoVote: " + err.Error()
-		log.Print(z)
-	}
-
-	var updatedCryptoVotes []model.CryptoVote
-
-	// para cada CryptoVote faz um update
-	for _, retrievedCryptoVote := range retrievedCryptoVotes {
-		// cria filtro com id para localizar dado
-		idFilter := bson.M{"_id": retrievedCryptoVote.Id}
-
-		savedCryptoVote, err := dao.UpdateOneCryptoVote(mongodbClient, idFilter, newData)
-		if err != nil {
-			z := "Problemas no uso de dao.UpdateOneCryptoVote: " + err.Error()
-			log.Print(z)
-		}
-		updatedCryptoVotes = append(updatedCryptoVotes, savedCryptoVote)
-	}
-	return updatedCryptoVotes, err
-}
-
-/*
-	UpdateAllCryptoVoteByFilter faz uma atualização de todas as model.CryptoVote que satisfazem o filtro
-	entrada
-	filter := bson.M{"key": "value"}
-
-	retorno
-	uma coleção de model.CryptoVote armazenada no banco, testes realizados como o mongoDB
-*/
-func UpdateOneCryptoVoteByFilter(filter bson.M, newData bson.M) (model.CryptoVote, error) {
+func UpdateOneCryptoVoteByFilter(filter bson.M, cryptoNewData model.CryptoVote) (model.CryptoVote, error) {
 	var retrievedCryptoVote model.CryptoVote
 
 	dao.SetCollectionName("cryptovotes")
@@ -300,9 +152,34 @@ func UpdateOneCryptoVoteByFilter(filter bson.M, newData bson.M) (model.CryptoVot
 		log.Print(z)
 	}
 
-	if !retrievedCryptoVote.Id.IsZero() {
+	// usa a função criada no pacote bo
+	validate, err := ValidateCryptoVoteUniqueData(cryptoNewData.Name, cryptoNewData.Symbol)
+
+	if !retrievedCryptoVote.Id.IsZero() && validate {
+		// caso os novos dados respeitem as regras de validateCryptoVoteUniqueData
+		// realiza a atualização
 		idFilter := bson.M{"_id": retrievedCryptoVote.Id}
 
+		// convertendo de model.CryptoVote para json
+		jsonData, err := json.Marshal(cryptoNewData)
+		if err != nil {
+			z := "Problemas no Marshal: " + err.Error()
+			log.Print(z)
+		}
+
+		// convertendo de json para bson
+		bsonCryptoNewData := bson.M{}
+		err = json.Unmarshal(jsonData, &bsonCryptoNewData)
+		if err != nil {
+			z := "Problemas no Unmarshal: " + err.Error()
+			log.Print(z)
+		}
+
+		newData := bson.M{
+			"$set": bsonCryptoNewData,
+		}
+
+		// atualização
 		retrievedCryptoVote, err = dao.UpdateOneCryptoVote(mongodbClient, idFilter, newData)
 		if err != nil {
 			z := "Problemas no uso de dao.UpdateOneCryptoVote: " + err.Error()
