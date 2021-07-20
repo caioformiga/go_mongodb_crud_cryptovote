@@ -10,8 +10,6 @@ import (
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/model"
 
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/utils"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestCreateCryptoVote(t *testing.T) {
@@ -34,9 +32,8 @@ func TestCreateCryptoVote(t *testing.T) {
 	limpar todos os dados
 */
 func testCreateCryptoVote0_Config(t *testing.T) {
-	// cria filtro vazio para remover todos os registros
-	filter := bson.M{}
-	_, err := bo.DeleteAllCryptoVoteByFilter(filter)
+	// limpa a coleção
+	_, err := bo.DeleteAllCryptoVote()
 	assert.Nil(t, err, "err should be nil")
 }
 

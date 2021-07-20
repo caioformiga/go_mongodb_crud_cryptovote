@@ -7,7 +7,6 @@ import (
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/model"
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/utils"
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestDeleteAllCryptoVoteByFilter(t *testing.T) {
@@ -52,10 +51,8 @@ func testDeleteAllCryptoVoteByFilter1_FilterNull(t *testing.T) {
 	list, _ := bo.RetrieveAllCryptoVoteByFilter(filterCryptoVote)
 	totalCount := int64(len(list))
 
-	// cria filtro vazio para remover todos os registros
-	filter := bson.M{}
-
-	deletedCount, err := bo.DeleteAllCryptoVoteByFilter(filter)
+	// limpa a coleção
+	deletedCount, err := bo.DeleteAllCryptoVote()
 	assert.Nil(t, err, "err should be nil")
 	assert.Equal(t, deletedCount, totalCount, "they should be equal")
 }

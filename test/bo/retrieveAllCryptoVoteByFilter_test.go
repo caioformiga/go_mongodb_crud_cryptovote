@@ -7,7 +7,6 @@ import (
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/model"
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/utils"
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestRetrieveAllCryptoVoteByFilter(t *testing.T) {
@@ -22,9 +21,8 @@ func TestRetrieveAllCryptoVoteByFilter(t *testing.T) {
 	insere 3 dados
 */
 func testRetrieveAllCryptoVoteByFilter0_Config(t *testing.T) {
-	// cria filtro vazio para remover todos os registros
-	filter := bson.M{}
-	_, err := bo.DeleteAllCryptoVoteByFilter(filter)
+	// limpa a coleção
+	_, err := bo.DeleteAllCryptoVote()
 	assert.Nil(t, err, "err should be nil")
 
 	// carrega json data com 3 CrypytoVotes
