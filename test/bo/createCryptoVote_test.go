@@ -15,7 +15,6 @@ import (
 )
 
 func TestCreateCryptoVote(t *testing.T) {
-
 	testCreateCryptoVote0_Config(t)
 	testCreateCryptoVote1_ValidatedData(t)
 	testCreateCryptoVote2_DuplicatedData(t)

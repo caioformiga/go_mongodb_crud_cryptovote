@@ -21,7 +21,7 @@ func CreateCryptoVote(mongodbClient *mongo.Client, CryptoVote model.CryptoVote) 
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
+	cryptoVoteCollection := mongodbClient.Database(db_name).Collection(collection_name)
 
 	insertResult, err := cryptoVoteCollection.InsertOne(mongoContext, CryptoVote)
 	return insertResult, err
@@ -37,7 +37,7 @@ func DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.De
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
+	cryptoVoteCollection := mongodbClient.Database(db_name).Collection(collection_name)
 
 	deleteResult, err := cryptoVoteCollection.DeleteMany(mongoContext, filter)
 	return deleteResult, err
@@ -55,7 +55,7 @@ func FindOneCryptoVote(mongodbClient *mongo.Client, filter bson.M) (model.Crypto
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
+	cryptoVoteCollection := mongodbClient.Database(db_name).Collection(collection_name)
 
 	singleResult := cryptoVoteCollection.FindOne(mongoContext, filter)
 	err := singleResult.Decode(&oneCryptoVote)
@@ -74,7 +74,7 @@ func FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.Cry
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
+	cryptoVoteCollection := mongodbClient.Database(db_name).Collection(collection_name)
 
 	cursor, err := cryptoVoteCollection.Find(mongoContext, filter)
 
@@ -107,7 +107,7 @@ func UpdateOneCryptoVote(mongodbClient *mongo.Client, filter bson.M, newData bso
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
+	cryptoVoteCollection := mongodbClient.Database(db_name).Collection(collection_name)
 
 	//se o documento não exisitr não faz nada
 	//se alterar para true cria um novo documento caso não seja localizado

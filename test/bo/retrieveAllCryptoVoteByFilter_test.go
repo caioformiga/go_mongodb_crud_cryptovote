@@ -10,23 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-var inDataTestRetrieveAllCryptoVoteByFilter = []byte(`[{
-	"name": "Bitcoin",
-	"symbol": "btc",
-	"qtd_upvote": 0,
-	"qtd_downvote": 0
-}, {
-	"name": "EthEreum",
-	"symbol": "EtH",
-	"qtd_upvote": 0,
-	"qtd_downvote": 0
-}, {	
-	"name": "klever",
-	"symbol": "KLV",
-	"qtd_upvote": 0,
-	"qtd_downvote": 0
-}]`)
-
 func TestRetrieveAllCryptoVoteByFilter(t *testing.T) {
 	testRetrieveAllCryptoVoteByFilter0_Config(t)
 	testRetrieveAllCryptoVoteByFilter1_FilterNull(t)

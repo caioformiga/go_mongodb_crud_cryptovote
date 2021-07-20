@@ -10,7 +10,6 @@ import (
 )
 
 func TestAddUpVote(t *testing.T) {
-
 	testAddUpVote0_Config(t)
 	testAddUpVote1_FilterByName(t)
 	testAddUpVote2_FilterBySymbol(t)

@@ -13,8 +13,7 @@ import (
 
 const (
 	//outra opção para conectar seria usado a DB_URI := "mongodb://localhost:27017"
-	DB_URI  = "mongodb://127.0.0.1:27017"
-	DB_NAME = "teste"
+	DB_URI = "mongodb://127.0.0.1:27017"
 )
 
 //padrão de projeto singleton
@@ -25,9 +24,22 @@ var mongoClientInstanceError error
 var mongoOnce sync.Once
 
 var collection_name string = "cryptovotes"
+var db_name string = "prod"
+
+func SetDtabaseName(name string) {
+	db_name = name
+}
+
+func GetDtabaseName() string {
+	return db_name
+}
 
 func SetCollectionName(name string) {
 	collection_name = name
+}
+
+func GetCollectionName() string {
+	return collection_name
 }
 
 //retorna a instancia de conexão singleton

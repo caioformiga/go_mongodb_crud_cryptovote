@@ -10,11 +10,9 @@ import (
 )
 
 func TestAddDownVote(t *testing.T) {
-
 	testAddDownVote0_Config(t)
 	testAddDownVote1_FilterByName(t)
 	testAddDownVote2_FilterBySymbol(t)
-
 	testAddDownVote3_FilterMissMatch(t)
 	testAddDownVote4_FormatArgs(t)
 	testAddDownVote5_EmptyArg(t)
