@@ -10,6 +10,40 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+func validateCryptoVoteArgumentNotEmpty(arg string) bool {
+	validate := false
+
+	if len(arg) > 0 {
+		validate = true
+	} else {
+		validate = false
+	}
+	return validate
+}
+
+func validateCryptoVoteArgumentLenght(arg string, lenght int) bool {
+	validate := false
+
+	if len(arg) <= lenght {
+		validate = true
+	} else {
+		validate = false
+	}
+	return validate
+}
+
+func validateCryptoVoteArgumentNotNegative(arg int) bool {
+	validate := false
+
+	if arg >= 0 {
+		validate = true
+	} else {
+		validate = false
+
+	}
+	return validate
+}
+
 /*
 	ValidateCryptoVoteArguments verifica se algum campo está fora do valor defalt
 	não atente aos critérios de unique abaixo
@@ -19,46 +53,37 @@ import (
 	Qtd_Downvote não pode ser menor do que zero
 */
 func ValidateCryptoVoteArguments(crypto model.CryptoVote) (bool, error) {
-	validate := false
+	var validate bool = false
 
-	if len(crypto.Name) > 0 {
-		validate = true
-	} else {
-		validate = false
+	validate = validateCryptoVoteArgumentNotEmpty(crypto.Name)
+	if !validate {
 		return validate, errors.New("[cryptovote.validationBO] name não pode ser vazio")
 	}
 
-	if len(crypto.Name) < 30 {
-		validate = true
-	} else {
-		validate = false
+	validate = validateCryptoVoteArgumentLenght(crypto.Name, 30)
+	if !validate {
 		return validate, errors.New("[cryptovote.validationBO] name não pode ter maior do que 30 caracteres")
 	}
 
-	if len(crypto.Symbol) > 0 {
-		validate = true
-	} else {
-		validate = false
+	validate = validateCryptoVoteArgumentNotEmpty(crypto.Symbol)
+	if !validate {
 		return validate, errors.New("[cryptovote.validationBO] symbol não pode ser vazio")
 	}
 
-	if len(crypto.Symbol) < 6 {
-		validate = true
-	} else {
-		validate = false
-		return validate, errors.New("[cryptovote.validationBO] symbol não pode ter mais do que 6 caracteres")
+	validate = validateCryptoVoteArgumentLenght(crypto.Symbol, 6)
+	if !validate {
+		return validate, errors.New("[cryptovote.validationBO] name não pode ter maior do que 6 caracteres")
 	}
 
-	if crypto.Qtd_Upvote >= 0 {
-		validate = true
-	} else {
+	validate = validateCryptoVoteArgumentNotNegative(crypto.Qtd_Upvote)
+	if !validate {
 		validate = false
 		return validate, errors.New("[cryptovote.validationBO] qtd_upvote não pode ser menor do que zero")
 	}
 
-	if crypto.Qtd_Downvote >= 0 {
-		validate = true
-	} else {
+	validate = validateCryptoVoteArgumentNotNegative(crypto.Qtd_Downvote)
+	if !validate {
+		validate = false
 		validate = false
 		return validate, errors.New("[cryptovote.validationBO] qtd_downvote não pode ser menor do que zero")
 	}
@@ -67,7 +92,7 @@ func ValidateCryptoVoteArguments(crypto model.CryptoVote) (bool, error) {
 
 func validateUnique(key string, value string) (bool, error) {
 	var validate bool = true
-	var retrievedCryptoVotes []model.CryptoVote
+	var retrivedCryptoVotes []model.CryptoVote
 
 	dao.SetCollectionName("cryptovotes")
 
@@ -79,13 +104,13 @@ func validateUnique(key string, value string) (bool, error) {
 	}
 
 	// usa a função criada no pacote dao
-	retrievedCryptoVotes, err = dao.FindManyCryptoVote(mongodbClient, bson.M{key: value})
+	retrivedCryptoVotes, err = dao.FindManyCryptoVote(mongodbClient, bson.M{key: value})
 	if err != nil {
 		z := "Problemas no uso de FindManyCryptoVote: " + err.Error()
 		log.Print(z)
 	}
 
-	if retrievedCryptoVotes != nil {
+	if retrivedCryptoVotes != nil {
 		validate = false
 		return validate, errors.New("[cryptovote.validationBO] campo(" + key + ") informado já exite, escolha outro diferente de " + value)
 	}
@@ -139,9 +164,10 @@ func ValidateCryptoVoteUniqueData(name string, symbol string) (bool, error) {
 */
 func ValidateCryptoVote(crypto model.CryptoVote) (bool, error) {
 	var validate = false
+	var err error
 
 	// usa a função criada no pacote bo
-	validate, err := ValidateCryptoVoteArguments(crypto)
+	validate, err = ValidateCryptoVoteArguments(crypto)
 	if err != nil {
 		z := "Problemas na validação de dados da nova CryptoVote: " + err.Error()
 		log.Print(z)

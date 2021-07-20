@@ -12,12 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-// variável usada para recuperar um registro do tipo model.CryptoVote
-var oneCryptoVote model.CryptoVote
-
-// variável usada para recuperar uma array de registro do tipo model.CryptoVote
-var manyCryptoVotes []model.CryptoVote
-
 /*
 	Função para criar um registro
 	usa na entrada um model.CryptoVote struct criado em outra camada
@@ -55,13 +49,16 @@ func DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.De
 	usa na entrada filter := bson.M{"symbol": "KLV"}
 */
 func FindOneCryptoVote(mongodbClient *mongo.Client, filter bson.M) (model.CryptoVote, error) {
+	var oneCryptoVote model.CryptoVote
+
 	//criar um contexto com deadline de 10 segundos
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	cryptoVoteCollection := mongodbClient.Database(DB_NAME).Collection(collection_name)
 
-	err := cryptoVoteCollection.FindOne(mongoContext, filter).Decode(&oneCryptoVote)
+	singleResult := cryptoVoteCollection.FindOne(mongoContext, filter)
+	err := singleResult.Decode(&oneCryptoVote)
 	return oneCryptoVote, err
 }
 
@@ -70,6 +67,9 @@ func FindOneCryptoVote(mongodbClient *mongo.Client, filter bson.M) (model.Crypto
 	usa na entrada filter := bson.M{"symbol": "KLV"}
 */
 func FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.CryptoVote, error) {
+	var oneCryptoVote model.CryptoVote
+	var manyCryptoVotes []model.CryptoVote
+
 	//criar um contexto com deadline de 10 segundos
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -101,6 +101,8 @@ func FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.Cry
 	usa na entrada newData := bson.M{"name": "New Data"}
 */
 func UpdateOneCryptoVote(mongodbClient *mongo.Client, filter bson.M, newData bson.M) (model.CryptoVote, error) {
+	var oneCryptoVote model.CryptoVote
+
 	//criar um contexto com deadline de 10 segundos
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
