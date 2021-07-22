@@ -18,8 +18,3 @@ type FilterCryptoVote struct {
 	Name   string             `json:"name,omitempty" bson:"name"`
 	Symbol string             `json:"symbol,omitempty" bson:"symbol"`
 }
-
-type PullCryptoVote struct {
-	Id      primitive.ObjectID `json:"-" bson:"_id,omitempty"`
-	Cryptos CryptoVote         `json:"crypto,omitempty" bson:"crypto"`
-}
