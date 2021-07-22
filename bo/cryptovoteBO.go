@@ -70,7 +70,22 @@ func CreateCryptoVote(cryptoVote model.CryptoVote) (model.CryptoVote, error) {
 /*
 	RetrieveAllCryptoVoteByFilter faz uma busca no banco para recuperar uma coleção de model.CryptoVote
 	entrada
-	filter := bson.M{"key": "value"}
+	entrada
+	// filtro vazio para recuperar todos os dados do banco
+	var filterCryptoVote = model.FilterCryptoVote{
+		Name:   "",
+		Symbol: "",
+	}
+
+	var filterCryptoVote = model.FilterCryptoVote{
+		Name:   "Klever",
+		Symbol: "",
+	}
+
+	var filterCryptoVote = model.FilterCryptoVote{
+		Name:   "",
+		Symbol: "KLV",
+	}
 
 	retorno
 	uma coleção de model.CryptoVote armazenada no banco, testes realizados como o mongoDB
