@@ -59,8 +59,7 @@ func testUpdateOneCryptoVoteByFilter0_Config(t *testing.T) {
 	faz a atualização
 */
 func testUpdateOneCryptoVoteByFilter1_FilterByNameValidData(t *testing.T) {
-	// cria model vazio que sera convertido para filtro vazio
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Klever",
 		Symbol: "",
 	}
@@ -82,7 +81,7 @@ func testUpdateOneCryptoVoteByFilter1_FilterByNameValidData(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter2_FilterBySymbolValidData(t *testing.T) {
 	// criar um filtro de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
 		Symbol: "NKLV",
 	}
@@ -104,7 +103,7 @@ func testUpdateOneCryptoVoteByFilter2_FilterBySymbolValidData(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter3_FilterMissMatch(t *testing.T) {
 	// criar um filtro miss match  para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Klever",
 		Symbol: "NeeeeeeeeeeeKLV",
 	}
@@ -126,7 +125,7 @@ func testUpdateOneCryptoVoteByFilter3_FilterMissMatch(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter4_FilterArgsEmpty(t *testing.T) {
 	// criar um filtro miss match  para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
 		Symbol: "",
 	}
@@ -148,7 +147,7 @@ func testUpdateOneCryptoVoteByFilter4_FilterArgsEmpty(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter5_FilterNull(t *testing.T) {
 	// criar um filtro de busca para fazer atualizações
-	var filterCryptoVote model.CryptoVote
+	var filterCryptoVote model.FilterCryptoVote
 
 	newCryptoData := model.CryptoVote{
 		Name:   "MissMatch Klever",
@@ -167,7 +166,7 @@ func testUpdateOneCryptoVoteByFilter5_FilterNull(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter6_DataEmptyArgs(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
 		Symbol: "btc",
 	}
@@ -189,7 +188,7 @@ func testUpdateOneCryptoVoteByFilter6_DataEmptyArgs(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter7_DataNull(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
 		Symbol: "btc",
 	}
@@ -209,7 +208,7 @@ func testUpdateOneCryptoVoteByFilter7_DataNull(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter8_DuplicatedData(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}
@@ -232,7 +231,7 @@ func testUpdateOneCryptoVoteByFilter8_DuplicatedData(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter9_MissingNameData(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}
@@ -256,7 +255,7 @@ func testUpdateOneCryptoVoteByFilter9_MissingNameData(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter10_MissingSymbolData(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}
@@ -280,7 +279,7 @@ func testUpdateOneCryptoVoteByFilter10_MissingSymbolData(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter11_SymbolTolargeData(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}
@@ -304,7 +303,7 @@ func testUpdateOneCryptoVoteByFilter11_SymbolTolargeData(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter12_NameTolargeData(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}
@@ -328,7 +327,7 @@ func testUpdateOneCryptoVoteByFilter12_NameTolargeData(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter13_NotUniqueSymbolData(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}
@@ -352,7 +351,7 @@ func testUpdateOneCryptoVoteByFilter13_NotUniqueSymbolData(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter14_NotUniqueNameData(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}
@@ -376,7 +375,7 @@ func testUpdateOneCryptoVoteByFilter14_NotUniqueNameData(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter15_UpvoteNegativeData(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}
@@ -400,7 +399,7 @@ func testUpdateOneCryptoVoteByFilter15_UpvoteNegativeData(t *testing.T) {
 */
 func testUpdateOneCryptoVoteByFilter16_DownvoteNegativeData(t *testing.T) {
 	// criar um filtro válido de busca para fazer atualizações
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}

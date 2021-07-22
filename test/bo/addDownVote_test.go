@@ -1,9 +1,11 @@
 package test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/bo"
+	"github.com/caioformiga/go_mongodb_crud_cryptovote/model"
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -49,11 +51,18 @@ func testAddDownVote0_Config(t *testing.T) {
 func testAddDownVote1_FilterByName(t *testing.T) {
 	name := "Klever"
 	symbol := ""
+
 	beforeCrypto, err := bo.RetrieveOneCryptoVote(name, symbol)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, beforeCrypto.Symbol, "should not be nil")
 
-	cryptoVote, err := bo.AddDownVote(name, symbol)
+	// popular os args no padrão para criar o filtro
+	var filterCryptoVote = model.FilterCryptoVote{
+		Name:   strings.Title(strings.ToLower(strings.TrimSpace(name))),
+		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
+	}
+
+	cryptoVote, err := bo.AddDownVote(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, cryptoVote.Symbol, "should not be nil")
 
@@ -75,7 +84,13 @@ func testAddDownVote2_FilterBySymbol(t *testing.T) {
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, beforeCrypto.Name, "should not be nil")
 
-	cryptoVote, err := bo.AddDownVote(name, symbol)
+	// popular os args no padrão para criar o filtro
+	var filterCryptoVote = model.FilterCryptoVote{
+		Name:   strings.Title(strings.ToLower(strings.TrimSpace(name))),
+		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
+	}
+
+	cryptoVote, err := bo.AddDownVote(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, cryptoVote.Name, "should not be nil")
 
@@ -100,7 +115,13 @@ func testAddDownVote3_FilterMissMatch(t *testing.T) {
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, beforeCrypto.Id.IsZero(), " should be true")
 
-	cryptoVote, err := bo.AddDownVote(name, symbol)
+	// popular os args no padrão para criar o filtro
+	var filterCryptoVote = model.FilterCryptoVote{
+		Name:   strings.Title(strings.ToLower(strings.TrimSpace(name))),
+		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
+	}
+
+	cryptoVote, err := bo.AddDownVote(filterCryptoVote)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, cryptoVote.Id.IsZero(), " should be true")
 }
@@ -119,7 +140,13 @@ func testAddDownVote4_FormatArgs(t *testing.T) {
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, beforeCrypto.Id.IsZero(), "err should not be nil")
 
-	cryptoVote, err := bo.AddDownVote(name, symbol)
+	// popular os args no padrão para criar o filtro
+	var filterCryptoVote = model.FilterCryptoVote{
+		Name:   strings.Title(strings.ToLower(strings.TrimSpace(name))),
+		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
+	}
+
+	cryptoVote, err := bo.AddDownVote(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, cryptoVote.Id.IsZero(), "err should not be nil")
 
@@ -141,7 +168,13 @@ func testAddDownVote5_EmptyArg(t *testing.T) {
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, beforeCrypto.Id.IsZero(), " should be true")
 
-	cryptoVote, err := bo.AddDownVote(name, symbol)
+	// popular os args no padrão para criar o filtro
+	var filterCryptoVote = model.FilterCryptoVote{
+		Name:   strings.Title(strings.ToLower(strings.TrimSpace(name))),
+		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
+	}
+
+	cryptoVote, err := bo.AddDownVote(filterCryptoVote)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, cryptoVote.Id.IsZero(), " should be true")
 }

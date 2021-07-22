@@ -73,7 +73,7 @@ func CreateCryptoVote(cryptoVote model.CryptoVote) (model.CryptoVote, error) {
 	retorno
 	uma coleção de model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
-func RetrieveAllCryptoVoteByFilter(filterCryptoVote model.CryptoVote) ([]model.CryptoVote, error) {
+func RetrieveAllCryptoVoteByFilter(filterCryptoVote model.FilterCryptoVote) ([]model.CryptoVote, error) {
 	var retrievedCryptoVotes []model.CryptoVote
 
 	dao.SetCollectionName("cryptovotes")
@@ -123,7 +123,7 @@ func RetrieveOneCryptoVote(name string, symbol string) (model.CryptoVote, error)
 	var retrievedCryptoVote model.CryptoVote
 
 	// popular os args no padrão para criar o filtro
-	var filterCryptoVote model.CryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   strings.Title(strings.ToLower(strings.TrimSpace(name))),
 		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
 	}
@@ -177,7 +177,7 @@ func RetrieveOneCryptoVote(name string, symbol string) (model.CryptoVote, error)
 /*
 	UpdateOneCryptoVoteByFilter faz uma atualização de todas as model.CryptoVote que satisfazem o filtro
 
-	filterCryptoVote = model.CryptoVote{
+	filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}
@@ -192,7 +192,7 @@ func RetrieveOneCryptoVote(name string, symbol string) (model.CryptoVote, error)
 	retorno
 	uma coleção de model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
-func UpdateOneCryptoVoteByFilter(filterCryptoVote model.CryptoVote, cryptoNewData model.CryptoVote) (model.CryptoVote, error) {
+func UpdateOneCryptoVoteByFilter(filterCryptoVote model.FilterCryptoVote, cryptoNewData model.CryptoVote) (model.CryptoVote, error) {
 	var retrievedCryptoVote model.CryptoVote = model.CryptoVote{}
 
 	dao.SetCollectionName("cryptovotes")
@@ -207,6 +207,7 @@ func UpdateOneCryptoVoteByFilter(filterCryptoVote model.CryptoVote, cryptoNewDat
 
 	cryptoNewData.Name = strings.Title(strings.ToLower(strings.TrimSpace(cryptoNewData.Name)))
 	cryptoNewData.Symbol = strings.ToUpper(strings.TrimSpace(cryptoNewData.Symbol))
+	cryptoNewData.Sum = cryptoNewData.Qtd_Upvote - cryptoNewData.Qtd_Downvote
 
 	// usa a função criada no pacote bo
 	validate, err := ValidateCryptoVote(cryptoNewData)
@@ -263,7 +264,7 @@ func UpdateOneCryptoVoteByFilter(filterCryptoVote model.CryptoVote, cryptoNewDat
 /*
 	DeleteAllCryptoVoteByFilter faz uma deleção de todas as model.CryptoVote que satisfazem o filtro
 
-	filterCryptoVote = model.CryptoVote{
+	filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
 		Symbol: "",
 	}
@@ -271,7 +272,7 @@ func UpdateOneCryptoVoteByFilter(filterCryptoVote model.CryptoVote, cryptoNewDat
 	retorno
 	a quantidade de model.CryptoVote deletadas do banco, testes realizados como o mongoDB
 */
-func DeleteAllCryptoVoteByFilter(filterCryptoVote model.CryptoVote) (int64, error) {
+func DeleteAllCryptoVoteByFilter(filterCryptoVote model.FilterCryptoVote) (int64, error) {
 	var validate bool = false
 	var err error
 
@@ -358,9 +359,9 @@ func DeleteAllCryptoVote() (int64, error) {
 	retorno
 	nil se não tiver problema ou erro caso contrário
 */
-func AddUpVote(name string, symbol string) (model.CryptoVote, error) {
+func AddUpVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, error) {
 	// usa a função criada no arquivo cryptovoteBO.go pacote bo
-	cryptoVote, err := RetrieveOneCryptoVote(name, symbol)
+	cryptoVote, err := RetrieveOneCryptoVote(filterCryptoVote.Name, filterCryptoVote.Symbol)
 	if err != nil {
 		z := "Problemas no uso de RetrieveOneCryptoVote: " + err.Error()
 		log.Print(z)
@@ -372,7 +373,10 @@ func AddUpVote(name string, symbol string) (model.CryptoVote, error) {
 
 		typeVote := "qtd_upvote"
 
-		cryptoVote, err = updateVote(cryptoVote, typeVote, newQtd)
+		// atualiza sempre o total
+		newSum := newQtd - cryptoVote.Qtd_Upvote
+
+		cryptoVote, err = updateVote(cryptoVote, typeVote, newQtd, newSum)
 	}
 	return cryptoVote, err
 }
@@ -385,9 +389,9 @@ func AddUpVote(name string, symbol string) (model.CryptoVote, error) {
 	retorno
 	nil se não tiver problema ou erro caso contrário
 */
-func AddDownVote(name string, symbol string) (model.CryptoVote, error) {
+func AddDownVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, error) {
 	// usa a função criada no arquivo cryptovoteBO.go pacote bo
-	cryptoVote, err := RetrieveOneCryptoVote(name, symbol)
+	cryptoVote, err := RetrieveOneCryptoVote(filterCryptoVote.Name, filterCryptoVote.Symbol)
 	if err != nil {
 		z := "Problemas no uso de UpdateAllCryptoVoteByFilter: " + err.Error()
 		log.Print(z)
@@ -397,14 +401,17 @@ func AddDownVote(name string, symbol string) (model.CryptoVote, error) {
 		// soma valor atual de Qtd_Downvote +1
 		newQtd := cryptoVote.Qtd_Downvote + 1
 
+		// atualiza sempre o total
+		newSum := cryptoVote.Qtd_Upvote - newQtd
+
 		typeVote := "qtd_downvote"
 
-		cryptoVote, err = updateVote(cryptoVote, typeVote, newQtd)
+		cryptoVote, err = updateVote(cryptoVote, typeVote, newQtd, newSum)
 	}
 	return cryptoVote, err
 }
 
-func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd int) (model.CryptoVote, error) {
+func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd int, newSum int) (model.CryptoVote, error) {
 	dao.SetCollectionName("cryptovotes")
 
 	// usa a função criada no pacote dao
@@ -418,7 +425,10 @@ func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd in
 	filter := bson.M{"_id": retrievedCryptoVote.Id}
 
 	newData := bson.M{
-		"$set": bson.M{typeVote: newQtd},
+		"$set": bson.M{
+			typeVote: newQtd,
+			"sum":    newSum,
+		},
 	}
 
 	retrievedCryptoVote, err = dao.UpdateOneCryptoVote(mongodbClient, filter, newData)

@@ -16,14 +16,17 @@ import (
 	Função para criar um registro
 	usa na entrada um model.CryptoVote struct criado em outra camada
 */
-func CreateCryptoVote(mongodbClient *mongo.Client, CryptoVote model.CryptoVote) (*mongo.InsertOneResult, error) {
+func CreateCryptoVote(mongodbClient *mongo.Client, cryptoVote model.CryptoVote) (*mongo.InsertOneResult, error) {
+	// antes de salvar no mongo faz a soma
+	cryptoVote.Sum = cryptoVote.Qtd_Upvote - cryptoVote.Qtd_Downvote
+
 	//criar um contexto com deadline de 10 segundos
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	cryptoVoteCollection := mongodbClient.Database(db_name).Collection(collection_name)
 
-	insertResult, err := cryptoVoteCollection.InsertOne(mongoContext, CryptoVote)
+	insertResult, err := cryptoVoteCollection.InsertOne(mongoContext, cryptoVote)
 	return insertResult, err
 }
 

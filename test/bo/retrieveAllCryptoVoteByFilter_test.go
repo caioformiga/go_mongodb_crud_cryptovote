@@ -45,7 +45,7 @@ func testRetrieveAllCryptoVoteByFilter0_Config(t *testing.T) {
 */
 func testRetrieveAllCryptoVoteByFilter1_FilterNull(t *testing.T) {
 	// cria model vazio que sera convertido para filtro vazio
-	var filterCryptoVote = model.CryptoVote{
+	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
 		Symbol: "",
 	}
