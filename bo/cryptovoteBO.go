@@ -3,6 +3,7 @@ package bo
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 
@@ -391,14 +392,14 @@ func AddUpVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, error
 
 	if !retrievedCryptoVote.Id.IsZero() {
 		// soma valor atual de Qtd_Upvote +1
-		newQtd := retrievedCryptoVote.Qtd_Upvote + 1
+		newQtd_Upvote := retrievedCryptoVote.Qtd_Upvote + 1
+
+		// atualiza sempre o total Up - Down
+		newSum := newQtd_Upvote - retrievedCryptoVote.Qtd_Downvote
 
 		typeVote := "qtd_upvote"
 
-		// atualiza sempre o total
-		newSum := newQtd - retrievedCryptoVote.Qtd_Upvote
-
-		retrievedCryptoVote, err = updateVote(retrievedCryptoVote, typeVote, newQtd, newSum)
+		retrievedCryptoVote, err = updateVote(retrievedCryptoVote, typeVote, newQtd_Upvote, newSum)
 	}
 	return retrievedCryptoVote, err
 }
@@ -420,14 +421,14 @@ func AddDownVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, err
 
 	if !retrievedCryptoVote.Id.IsZero() {
 		// soma valor atual de Qtd_Downvote +1
-		newQtd := retrievedCryptoVote.Qtd_Downvote + 1
+		newQtd_Downvote := retrievedCryptoVote.Qtd_Downvote + 1
 
-		// atualiza sempre o total
-		newSum := retrievedCryptoVote.Qtd_Upvote - newQtd
+		// atualiza sempre o total Up - Down
+		newSum := retrievedCryptoVote.Qtd_Upvote - newQtd_Downvote
 
 		typeVote := "qtd_downvote"
 
-		retrievedCryptoVote, err = updateVote(retrievedCryptoVote, typeVote, newQtd, newSum)
+		retrievedCryptoVote, err = updateVote(retrievedCryptoVote, typeVote, newQtd_Downvote, newSum)
 		if err != nil {
 			z := "[cryptovote.mongodb] Problemas no uso de updateVote: " + err.Error()
 			err = errors.New(z)
@@ -466,4 +467,57 @@ func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd in
 	}
 
 	return retrievedCryptoVote, err
+}
+
+func SumaryAllCryptoVote(pageSize int64) ([]model.CryptoVote, error) {
+	var retrievedCryptoVotes []model.CryptoVote
+	var filterCryptoVote model.FilterCryptoVote
+	var err error
+
+	dao.SetCollectionName("cryptovotes")
+
+	// usa a função criada no pacote dao
+	mongodbClient, err := dao.GetMongoClientInstance()
+	if err != nil {
+		z := "[cryptovote.mongodb] Problemas no uso de GetMongoClientInstance: " + err.Error()
+		err = errors.New(z)
+		return retrievedCryptoVotes, err
+	}
+
+	// se for nil precisamos criar um filtro vazio
+	filterCryptoVote = model.FilterCryptoVote{
+		Name:   "",
+		Symbol: "",
+	}
+
+	// convertendo de CryptoVote para json
+	jsonData, err := json.Marshal(filterCryptoVote)
+	if err != nil {
+		z := "[cryptovote.json] Problemas para fazer Marshal de CryptoVote para json: " + err.Error()
+		err = errors.New(z)
+		return retrievedCryptoVotes, err
+	}
+
+	// convertendo de json para bson
+	var filter = bson.M{}
+	err = json.Unmarshal(jsonData, &filter)
+	if err != nil {
+		z := "[cryptovote.json] Problemas para fazer Unmarshal de json para bson.M: " + err.Error()
+		err = errors.New(z)
+		return retrievedCryptoVotes, err
+	}
+
+	retrievedCryptoVotes, err = dao.FindManyCryptoVoteLimitedSortedByField(mongodbClient, filter, pageSize, "sum", -1)
+	if err != nil {
+		z := "[cryptovote.mongodb] Problemas em dao.FindManyCryptoVoteLimitedSortedByField: " + err.Error()
+		err = errors.New(z)
+		return retrievedCryptoVotes, err
+	}
+
+	if int64(len(retrievedCryptoVotes)) > pageSize {
+		z := fmt.Sprintf("[cryptovote.mongodb] Problemas para garantir o tamanho limite de pageSize(%d) CryptoVotes", pageSize)
+		err = errors.New(z)
+		return nil, err
+	}
+	return retrievedCryptoVotes, err
 }
