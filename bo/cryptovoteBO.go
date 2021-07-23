@@ -232,7 +232,7 @@ func UpdateOneCryptoVoteByFilter(filterCryptoVote model.FilterCryptoVote, crypto
 
 	cryptoNewData.Name = strings.Title(strings.ToLower(strings.TrimSpace(cryptoNewData.Name)))
 	cryptoNewData.Symbol = strings.ToUpper(strings.TrimSpace(cryptoNewData.Symbol))
-	cryptoNewData.Sum = utils.Abs(cryptoNewData.Qtd_Upvote - cryptoNewData.Qtd_Downvote)
+	cryptoNewData.Sum = cryptoNewData.Qtd_Upvote - cryptoNewData.Qtd_Downvote
 
 	// usa a função criada no pacote bo
 	validate, err := ValidateCryptoVote(cryptoNewData)
@@ -396,7 +396,7 @@ func AddUpVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, error
 		newQtd_Upvote := retrievedCryptoVote.Qtd_Upvote + 1
 
 		// atualiza sempre o total Up - Down
-		newSum := utils.Abs(newQtd_Upvote - retrievedCryptoVote.Qtd_Downvote)
+		newSum := newQtd_Upvote - retrievedCryptoVote.Qtd_Downvote
 
 		typeVote := "qtd_upvote"
 
@@ -425,7 +425,7 @@ func AddDownVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, err
 		newQtd_Downvote := retrievedCryptoVote.Qtd_Downvote + 1
 
 		// atualiza sempre o total Up - Down
-		newSum := utils.Abs(retrievedCryptoVote.Qtd_Upvote - newQtd_Downvote)
+		newSum := retrievedCryptoVote.Qtd_Upvote - newQtd_Downvote
 
 		typeVote := "qtd_downvote"
 
@@ -480,10 +480,11 @@ func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd in
 	flag_default_page_size = 10
 
 	retorno
-	slice de []model.CryptoVote
+	slice de []model.SumaryVote
 	nil se não tiver problema ou erro caso contrário
 */
-func SumaryAllCryptoVote(pageSize int64) ([]model.CryptoVote, error) {
+func SumaryAllCryptoVote(pageSize int64) ([]model.SumaryVote, error) {
+	var sumaryCryptoVotes []model.SumaryVote
 	var retrievedCryptoVotes []model.CryptoVote
 	var filterCryptoVote model.FilterCryptoVote
 	var err error
@@ -502,7 +503,7 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.CryptoVote, error) {
 	if err != nil {
 		z := "[cryptovote.mongodb] Problemas no uso de GetMongoClientInstance: " + err.Error()
 		err = errors.New(z)
-		return retrievedCryptoVotes, err
+		return sumaryCryptoVotes, err
 	}
 
 	// se for nil precisamos criar um filtro vazio
@@ -516,7 +517,7 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.CryptoVote, error) {
 	if err != nil {
 		z := "[cryptovote.json] Problemas para fazer Marshal de CryptoVote para json: " + err.Error()
 		err = errors.New(z)
-		return retrievedCryptoVotes, err
+		return sumaryCryptoVotes, err
 	}
 
 	// convertendo de json para bson
@@ -525,14 +526,14 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.CryptoVote, error) {
 	if err != nil {
 		z := "[cryptovote.json] Problemas para fazer Unmarshal de json para bson.M: " + err.Error()
 		err = errors.New(z)
-		return retrievedCryptoVotes, err
+		return sumaryCryptoVotes, err
 	}
 
 	retrievedCryptoVotes, err = dao.FindManyCryptoVoteLimitedSortedByField(mongodbClient, filter, pageSize, "sum", -1)
 	if err != nil {
 		z := "[cryptovote.mongodb] Problemas em dao.FindManyCryptoVoteLimitedSortedByField: " + err.Error()
 		err = errors.New(z)
-		return retrievedCryptoVotes, err
+		return sumaryCryptoVotes, err
 	}
 
 	if int64(len(retrievedCryptoVotes)) > pageSize {
@@ -540,5 +541,26 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.CryptoVote, error) {
 		err = errors.New(z)
 		return nil, err
 	}
-	return retrievedCryptoVotes, err
+
+	sumaryCryptoVotes = nil
+	for _, cryptoVotes := range retrievedCryptoVotes {
+
+		var sumary model.SumaryVote
+		sumary.CryptoVote = cryptoVotes
+		sumary.SumAbsolute = utils.Abs(cryptoVotes.Sum)
+
+		var sumType string
+		if cryptoVotes.Qtd_Upvote == cryptoVotes.Qtd_Downvote {
+			sumType = "Equal"
+		} else {
+			if cryptoVotes.Qtd_Upvote < cryptoVotes.Qtd_Downvote {
+				sumType = "Up vote"
+			}
+			sumType = "Down vote"
+		}
+		sumary.SumType = sumType
+
+		sumaryCryptoVotes = append(sumaryCryptoVotes, sumary)
+	}
+	return sumaryCryptoVotes, err
 }
