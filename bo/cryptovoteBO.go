@@ -543,17 +543,17 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.SumaryVote, error) {
 	}
 
 	sumaryCryptoVotes = nil
-	for _, cryptoVotes := range retrievedCryptoVotes {
+	for _, cryptoVote := range retrievedCryptoVotes {
 
 		var sumary model.SumaryVote
-		sumary.CryptoVote = cryptoVotes
-		sumary.SumAbsolute = utils.Abs(cryptoVotes.Sum)
+		sumary.CryptoVote = cryptoVote
+		sumary.SumAbsolute = utils.Abs(cryptoVote.Sum)
 
 		var sumType string
-		if cryptoVotes.Qtd_Upvote == cryptoVotes.Qtd_Downvote {
+		if cryptoVote.Qtd_Upvote == cryptoVote.Qtd_Downvote {
 			sumType = "Equal"
 		} else {
-			if cryptoVotes.Qtd_Upvote > cryptoVotes.Qtd_Downvote {
+			if cryptoVote.Qtd_Upvote > cryptoVote.Qtd_Downvote {
 				sumType = "Up vote"
 			} else {
 				sumType = "Down vote"
