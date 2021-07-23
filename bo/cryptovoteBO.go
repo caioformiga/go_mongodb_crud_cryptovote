@@ -555,8 +555,7 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.SumaryCryptoVote, error) {
 	sumaryCryptoVotes = nil
 	for _, cryptoVote := range retrievedCryptoVotes {
 		var sumary model.SumaryCryptoVote
-		sumary.Crypto = cryptoVote
-		sumary.SumToken = cryptoVote.Name + "/" + cryptoVote.Symbol
+		sumary.Token = cryptoVote.Name + "/" + cryptoVote.Symbol
 		sumary.SumAbsolute = cryptoVote.SumAbsolute
 
 		var sumType string

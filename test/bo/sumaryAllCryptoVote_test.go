@@ -88,13 +88,13 @@ func testSumaryAllCryptoVote2_SortedDesc(t *testing.T) {
 	assert.Nil(t, err, "err should be nil")
 
 	prim := list[0]
-	assert.Equal(t, prim.Crypto.Symbol, "KLV", "they should be equal")
+	assert.Equal(t, prim.Token, "Klever/KLV", "they should be equal")
 
 	seg := list[1]
-	assert.Equal(t, seg.Crypto.Symbol, "BTC", "they should be equal")
+	assert.Equal(t, seg.Token, "Bitcoin/BTC", "they should be equal")
 
 	ult := list[2]
-	assert.Equal(t, ult.Crypto.Symbol, "ETH", "they should be equal")
+	assert.Equal(t, ult.Token, "Ethereum/ETH", "they should be equal")
 }
 
 /*

@@ -21,8 +21,7 @@ type FilterCryptoVote struct {
 }
 
 type SumaryCryptoVote struct {
-	Crypto      CryptoVote `json:"-" bson:"-"`
-	SumToken    string     `json:"sum_token" bson:"sum_token"`
-	SumType     string     `json:"sum_type" bson:"sum_type"`
-	SumAbsolute int        `json:"sum_absolute" bson:"sum_absolute"`
+	Token       string `json:"token" bson:"token"`
+	SumType     string `json:"sum_type" bson:"sum_type"`
+	SumAbsolute int    `json:"sum_absolute" bson:"sum_absolute"`
 }
