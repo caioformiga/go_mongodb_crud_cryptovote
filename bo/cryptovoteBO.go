@@ -490,8 +490,8 @@ func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd in
 	slice de []model.SumaryVote
 	nil se não tiver problema ou erro caso contrário
 */
-func SumaryAllCryptoVote(pageSize int64) ([]model.SumaryVote, error) {
-	var sumaryCryptoVotes []model.SumaryVote
+func SumaryAllCryptoVote(pageSize int64) ([]model.SumaryCryptoVote, error) {
+	var sumaryCryptoVotes []model.SumaryCryptoVote
 	var retrievedCryptoVotes []model.CryptoVote
 	var filterCryptoVote model.FilterCryptoVote
 	var err error
@@ -554,7 +554,7 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.SumaryVote, error) {
 
 	sumaryCryptoVotes = nil
 	for _, cryptoVote := range retrievedCryptoVotes {
-		var sumary model.SumaryVote
+		var sumary model.SumaryCryptoVote
 		sumary.Crypto = cryptoVote
 		sumary.SumToken = cryptoVote.Name + "/" + cryptoVote.Symbol
 		sumary.SumAbsolute = cryptoVote.SumAbsolute

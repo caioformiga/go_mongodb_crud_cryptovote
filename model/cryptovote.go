@@ -20,7 +20,7 @@ type FilterCryptoVote struct {
 	Symbol string             `json:"symbol,omitempty" bson:"symbol"`
 }
 
-type SumaryVote struct {
+type SumaryCryptoVote struct {
 	Crypto      CryptoVote `json:"-" bson:"-"`
 	SumToken    string     `json:"sum_token" bson:"sum_token"`
 	SumType     string     `json:"sum_type" bson:"sum_type"`
