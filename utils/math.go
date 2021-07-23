@@ -16,10 +16,3 @@ func Abs(x int) int {
 	}
 	return int(a)
 }
-
-func Maior(x int, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}

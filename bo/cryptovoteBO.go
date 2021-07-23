@@ -29,6 +29,8 @@ func CreateCryptoVote(cryptoVote model.CryptoVote) (model.CryptoVote, error) {
 	// popular no padrão
 	cryptoVote.Name = strings.Title(strings.ToLower(strings.TrimSpace(cryptoVote.Name)))
 	cryptoVote.Symbol = strings.ToUpper(strings.TrimSpace(cryptoVote.Symbol))
+	cryptoVote.Sum = cryptoVote.Qtd_Upvote - cryptoVote.Qtd_Downvote
+	cryptoVote.SumAbsolute = utils.Abs(cryptoVote.Sum)
 
 	dao.SetCollectionName("cryptovotes")
 
@@ -398,9 +400,11 @@ func AddUpVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, error
 		// atualiza sempre o total Up - Down
 		newSum := newQtd_Upvote - retrievedCryptoVote.Qtd_Downvote
 
+		newSumAbsolute := utils.Abs(newSum)
+
 		typeVote := "qtd_upvote"
 
-		retrievedCryptoVote, err = updateVote(retrievedCryptoVote, typeVote, newQtd_Upvote, newSum)
+		retrievedCryptoVote, err = updateVote(retrievedCryptoVote, typeVote, newQtd_Upvote, newSum, newSumAbsolute)
 	}
 	return retrievedCryptoVote, err
 }
@@ -427,9 +431,11 @@ func AddDownVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, err
 		// atualiza sempre o total Up - Down
 		newSum := retrievedCryptoVote.Qtd_Upvote - newQtd_Downvote
 
+		newSumAbsolute := utils.Abs(newSum)
+
 		typeVote := "qtd_downvote"
 
-		retrievedCryptoVote, err = updateVote(retrievedCryptoVote, typeVote, newQtd_Downvote, newSum)
+		retrievedCryptoVote, err = updateVote(retrievedCryptoVote, typeVote, newQtd_Downvote, newSum, newSumAbsolute)
 		if err != nil {
 			z := "[cryptovote.mongodb] Problemas no uso de updateVote: " + err.Error()
 			err = errors.New(z)
@@ -439,7 +445,7 @@ func AddDownVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, err
 	return retrievedCryptoVote, err
 }
 
-func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd int, newSum int) (model.CryptoVote, error) {
+func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd int, newSum int, newSumAbsolute int) (model.CryptoVote, error) {
 	dao.SetCollectionName("cryptovotes")
 
 	// usa a função criada no pacote dao
@@ -455,8 +461,9 @@ func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd in
 
 	newData := bson.M{
 		"$set": bson.M{
-			typeVote: newQtd,
-			"sum":    newSum,
+			typeVote:       newQtd,
+			"sum":          newSum,
+			"sum_absolute": newSumAbsolute,
 		},
 	}
 
@@ -529,7 +536,10 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.SumaryVote, error) {
 		return sumaryCryptoVotes, err
 	}
 
-	retrievedCryptoVotes, err = dao.FindManyCryptoVoteLimitedSortedByField(mongodbClient, filter, pageSize, "sum", -1)
+	// orderType ascending = 1 / descending = -1
+	orderType := -1
+	sortFieldName := "sum_absolute"
+	retrievedCryptoVotes, err = dao.FindManyCryptoVoteLimitedSortedByField(mongodbClient, filter, pageSize, sortFieldName, orderType)
 	if err != nil {
 		z := "[cryptovote.mongodb] Problemas em dao.FindManyCryptoVoteLimitedSortedByField: " + err.Error()
 		err = errors.New(z)
@@ -544,10 +554,10 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.SumaryVote, error) {
 
 	sumaryCryptoVotes = nil
 	for _, cryptoVote := range retrievedCryptoVotes {
-
 		var sumary model.SumaryVote
-		sumary.CryptoVote = cryptoVote
-		sumary.SumAbsolute = utils.Abs(cryptoVote.Sum)
+		sumary.Crypto = cryptoVote
+		sumary.SumToken = cryptoVote.Name + "/" + cryptoVote.Symbol
+		sumary.SumAbsolute = cryptoVote.SumAbsolute
 
 		var sumType string
 		if cryptoVote.Qtd_Upvote == cryptoVote.Qtd_Downvote {

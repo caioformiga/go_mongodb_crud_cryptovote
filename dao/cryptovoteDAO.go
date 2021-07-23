@@ -98,9 +98,8 @@ func FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.Cry
 
 /*
 	Função para recuperar vários registros de model.CryptoVote
-	usa na entrada filter := bson.M{"symbol": "KLV"}
 */
-func FindManyCryptoVoteLimitedSortedByField(mongodbClient *mongo.Client, filter bson.M, limit int64, field string, orderType int) ([]model.CryptoVote, error) {
+func FindManyCryptoVoteLimitedSortedByField(mongodbClient *mongo.Client, filter bson.M, limit int64, sortFieldName string, orderType int) ([]model.CryptoVote, error) {
 	var oneCryptoVote model.CryptoVote
 	var manyCryptoVotes []model.CryptoVote
 
@@ -112,8 +111,8 @@ func FindManyCryptoVoteLimitedSortedByField(mongodbClient *mongo.Client, filter 
 
 	opt := options.Find()
 	opt.SetLimit(limit)
-	// Sort by field usinng orderType para ascending = 1 / descending = -1
-	opt.SetSort(bson.D{{Key: field, Value: orderType}})
+	// Sort by field usinng orderType
+	opt.SetSort(bson.D{{Key: sortFieldName, Value: orderType}})
 
 	cursor, err := cryptoVoteCollection.Find(mongoContext, filter, opt)
 
