@@ -553,10 +553,11 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.SumaryVote, error) {
 		if cryptoVotes.Qtd_Upvote == cryptoVotes.Qtd_Downvote {
 			sumType = "Equal"
 		} else {
-			if cryptoVotes.Qtd_Upvote < cryptoVotes.Qtd_Downvote {
+			if cryptoVotes.Qtd_Upvote > cryptoVotes.Qtd_Downvote {
 				sumType = "Up vote"
+			} else {
+				sumType = "Down vote"
 			}
-			sumType = "Down vote"
 		}
 		sumary.SumType = sumType
 
