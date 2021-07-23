@@ -9,6 +9,7 @@ import (
 
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/dao"
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/model"
+	"github.com/caioformiga/go_mongodb_crud_cryptovote/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -231,7 +232,7 @@ func UpdateOneCryptoVoteByFilter(filterCryptoVote model.FilterCryptoVote, crypto
 
 	cryptoNewData.Name = strings.Title(strings.ToLower(strings.TrimSpace(cryptoNewData.Name)))
 	cryptoNewData.Symbol = strings.ToUpper(strings.TrimSpace(cryptoNewData.Symbol))
-	cryptoNewData.Sum = cryptoNewData.Qtd_Upvote - cryptoNewData.Qtd_Downvote
+	cryptoNewData.Sum = utils.Abs(cryptoNewData.Qtd_Upvote - cryptoNewData.Qtd_Downvote)
 
 	// usa a função criada no pacote bo
 	validate, err := ValidateCryptoVote(cryptoNewData)
@@ -395,7 +396,7 @@ func AddUpVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, error
 		newQtd_Upvote := retrievedCryptoVote.Qtd_Upvote + 1
 
 		// atualiza sempre o total Up - Down
-		newSum := newQtd_Upvote - retrievedCryptoVote.Qtd_Downvote
+		newSum := utils.Abs(newQtd_Upvote - retrievedCryptoVote.Qtd_Downvote)
 
 		typeVote := "qtd_upvote"
 
@@ -424,7 +425,7 @@ func AddDownVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, err
 		newQtd_Downvote := retrievedCryptoVote.Qtd_Downvote + 1
 
 		// atualiza sempre o total Up - Down
-		newSum := retrievedCryptoVote.Qtd_Upvote - newQtd_Downvote
+		newSum := utils.Abs(retrievedCryptoVote.Qtd_Upvote - newQtd_Downvote)
 
 		typeVote := "qtd_downvote"
 
@@ -469,10 +470,23 @@ func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd in
 	return retrievedCryptoVote, err
 }
 
+/*
+	SumaryAllCryptoVote faz uma busca ordenando as CryptoVote pelo campo Sum
+	entrada pageSize representa o total de CryptoVote retornadas,
+	campo Sum é o resultado de valor absoluto (Upvote - DownVote)
+
+	retorno
+	nil se não tiver problema ou erro caso contrário
+*/
 func SumaryAllCryptoVote(pageSize int64) ([]model.CryptoVote, error) {
 	var retrievedCryptoVotes []model.CryptoVote
 	var filterCryptoVote model.FilterCryptoVote
 	var err error
+
+	// caso seja vazio ou zero usa o valor padrao 10
+	if pageSize == int64(0) {
+		pageSize = int64(10)
+	}
 
 	dao.SetCollectionName("cryptovotes")
 
