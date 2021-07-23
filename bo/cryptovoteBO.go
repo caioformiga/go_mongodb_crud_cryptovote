@@ -475,7 +475,12 @@ func updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd in
 	entrada pageSize representa o total de CryptoVote retornadas,
 	campo Sum é o resultado de valor absoluto (Upvote - DownVote)
 
+	caso pageSize == zero, usa o padrão 10
+	flag_zero = 0
+	flag_default_page_size = 10
+
 	retorno
+	slice de []model.CryptoVote
 	nil se não tiver problema ou erro caso contrário
 */
 func SumaryAllCryptoVote(pageSize int64) ([]model.CryptoVote, error) {
@@ -483,9 +488,11 @@ func SumaryAllCryptoVote(pageSize int64) ([]model.CryptoVote, error) {
 	var filterCryptoVote model.FilterCryptoVote
 	var err error
 
+	var flag_zero = 0
+	var flag_default_page_size = 10
 	// caso seja vazio ou zero usa o valor padrao 10
-	if pageSize == int64(0) {
-		pageSize = int64(10)
+	if pageSize == int64(flag_zero) {
+		pageSize = int64(flag_default_page_size)
 	}
 
 	dao.SetCollectionName("cryptovotes")
