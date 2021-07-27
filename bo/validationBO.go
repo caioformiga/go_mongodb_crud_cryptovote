@@ -104,7 +104,7 @@ func validateUnique(key string, value string) (bool, error) {
 	}
 
 	// usa a função criada no pacote dao
-	retrivedCryptoVotes, err = dao.FindManyCryptoVote(mongodbClient, bson.M{key: value})
+	retrivedCryptoVotes, err = mongodbDAO.FindManyCryptoVote(mongodbClient, bson.M{key: value})
 	if err != nil {
 		z := "Problemas no uso de FindManyCryptoVote: " + err.Error()
 		log.Print(z)

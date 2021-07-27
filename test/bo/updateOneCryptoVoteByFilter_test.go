@@ -10,23 +10,28 @@ import (
 )
 
 func TestUpdateOneCryptoVoteByFilter(t *testing.T) {
-	testUpdateOneCryptoVoteByFilter0_Config(t)
-	testUpdateOneCryptoVoteByFilter1_FilterByNameValidData(t)
-	testUpdateOneCryptoVoteByFilter2_FilterBySymbolValidData(t)
-	testUpdateOneCryptoVoteByFilter3_FilterMissMatch(t)
-	testUpdateOneCryptoVoteByFilter4_FilterArgsEmpty(t)
-	testUpdateOneCryptoVoteByFilter5_FilterNull(t)
-	testUpdateOneCryptoVoteByFilter6_DataEmptyArgs(t)
-	testUpdateOneCryptoVoteByFilter7_DataNull(t)
-	testUpdateOneCryptoVoteByFilter8_DuplicatedData(t)
-	testUpdateOneCryptoVoteByFilter9_MissingNameData(t)
-	testUpdateOneCryptoVoteByFilter10_MissingSymbolData(t)
-	testUpdateOneCryptoVoteByFilter11_SymbolTolargeData(t)
-	testUpdateOneCryptoVoteByFilter12_NameTolargeData(t)
-	testUpdateOneCryptoVoteByFilter13_NotUniqueSymbolData(t)
-	testUpdateOneCryptoVoteByFilter14_NotUniqueNameData(t)
-	testUpdateOneCryptoVoteByFilter15_UpvoteNegativeData(t)
-	testUpdateOneCryptoVoteByFilter16_DownvoteNegativeData(t)
+	/*
+		Instância que permite acessar os metodos implementados em bo.CryptoVoteBO
+	*/
+	var cryptoVoteBO bo.InterfaceCryptoVoteBO = bo.CryptoVoteBO{}
+
+	testUpdateOneCryptoVoteByFilter0_Config(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter1_FilterByNameValidData(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter2_FilterBySymbolValidData(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter3_FilterMissMatch(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter4_FilterArgsEmpty(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter5_FilterNull(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter6_DataEmptyArgs(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter7_DataNull(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter8_DuplicatedData(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter9_MissingNameData(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter10_MissingSymbolData(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter11_SymbolTolargeData(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter12_NameTolargeData(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter13_NotUniqueSymbolData(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter14_NotUniqueNameData(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter15_UpvoteNegativeData(t, cryptoVoteBO)
+	testUpdateOneCryptoVoteByFilter16_DownvoteNegativeData(t, cryptoVoteBO)
 }
 
 /*
@@ -35,9 +40,9 @@ func TestUpdateOneCryptoVoteByFilter(t *testing.T) {
 	remove todos os dados
 	insere 3 dados
 */
-func testUpdateOneCryptoVoteByFilter0_Config(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter0_Config(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// limpa a coleção
-	_, err := bo.DeleteAllCryptoVote()
+	_, err := cryptoVoteBO.DeleteAllCryptoVote()
 	assert.Nil(t, err, "err should be nil")
 
 	// carrega json data com 3 CrypytoVotes
@@ -48,7 +53,7 @@ func testUpdateOneCryptoVoteByFilter0_Config(t *testing.T) {
 	for i := 0; i < tam; i++ {
 		cryptoVote := listIn[i]
 
-		_, err := bo.CreateCryptoVote(cryptoVote)
+		_, err := cryptoVoteBO.CreateCryptoVote(cryptoVote)
 		assert.Nil(t, err, "err should be nil")
 	}
 }
@@ -58,7 +63,7 @@ func testUpdateOneCryptoVoteByFilter0_Config(t *testing.T) {
 	atualiza usando filter by name
 	faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter1_FilterByNameValidData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter1_FilterByNameValidData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Klever",
 		Symbol: "",
@@ -69,7 +74,7 @@ func testUpdateOneCryptoVoteByFilter1_FilterByNameValidData(t *testing.T) {
 		Symbol: "NKLV",
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.Nil(t, err, "err should be nil")
 	assert.False(t, updatedCryptoVote.Id.IsZero(), "should be false")
 }
@@ -79,7 +84,7 @@ func testUpdateOneCryptoVoteByFilter1_FilterByNameValidData(t *testing.T) {
 	atualiza usando filter by symbol
 	faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter2_FilterBySymbolValidData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter2_FilterBySymbolValidData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
@@ -91,7 +96,7 @@ func testUpdateOneCryptoVoteByFilter2_FilterBySymbolValidData(t *testing.T) {
 		Symbol: "KLV",
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.Nil(t, err, "err should be nil")
 	assert.False(t, updatedCryptoVote.Id.IsZero(), "should be false")
 }
@@ -101,7 +106,7 @@ func testUpdateOneCryptoVoteByFilter2_FilterBySymbolValidData(t *testing.T) {
 	atualiza usando filter miss match
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter3_FilterMissMatch(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter3_FilterMissMatch(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro miss match  para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Klever",
@@ -113,7 +118,7 @@ func testUpdateOneCryptoVoteByFilter3_FilterMissMatch(t *testing.T) {
 		Symbol: "MM KLV",
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -123,7 +128,7 @@ func testUpdateOneCryptoVoteByFilter3_FilterMissMatch(t *testing.T) {
 	atualiza usando filter com os args (name e symbol) empty
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter4_FilterArgsEmpty(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter4_FilterArgsEmpty(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro miss match  para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
@@ -135,7 +140,7 @@ func testUpdateOneCryptoVoteByFilter4_FilterArgsEmpty(t *testing.T) {
 		Symbol: "MM KLV",
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -145,7 +150,7 @@ func testUpdateOneCryptoVoteByFilter4_FilterArgsEmpty(t *testing.T) {
 	atualiza usando filter nul
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter5_FilterNull(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter5_FilterNull(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro de busca para fazer atualizações
 	var filterCryptoVote model.FilterCryptoVote
 
@@ -154,7 +159,7 @@ func testUpdateOneCryptoVoteByFilter5_FilterNull(t *testing.T) {
 		Symbol: "MM KLV",
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -164,7 +169,7 @@ func testUpdateOneCryptoVoteByFilter5_FilterNull(t *testing.T) {
 	atualiza usando data (name e symbol) empty
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter6_DataEmptyArgs(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter6_DataEmptyArgs(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
@@ -176,7 +181,7 @@ func testUpdateOneCryptoVoteByFilter6_DataEmptyArgs(t *testing.T) {
 		Symbol: "",
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -186,7 +191,7 @@ func testUpdateOneCryptoVoteByFilter6_DataEmptyArgs(t *testing.T) {
 	atualiza usando null data
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter7_DataNull(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter7_DataNull(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
@@ -196,7 +201,7 @@ func testUpdateOneCryptoVoteByFilter7_DataNull(t *testing.T) {
 	// nil cryptoData sem nada
 	var nilCryptoData model.CryptoVote
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, nilCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, nilCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -206,7 +211,7 @@ func testUpdateOneCryptoVoteByFilter7_DataNull(t *testing.T) {
 	atualiza usando null dados duplicados
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter8_DuplicatedData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter8_DuplicatedData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
@@ -219,7 +224,7 @@ func testUpdateOneCryptoVoteByFilter8_DuplicatedData(t *testing.T) {
 
 	cryptoVote := listIn[0]
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, cryptoVote)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, cryptoVote)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -229,7 +234,7 @@ func testUpdateOneCryptoVoteByFilter8_DuplicatedData(t *testing.T) {
 	atualiza com empty name CryptoVote
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter9_MissingNameData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter9_MissingNameData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
@@ -243,7 +248,7 @@ func testUpdateOneCryptoVoteByFilter9_MissingNameData(t *testing.T) {
 		Qtd_Downvote: 0,
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -253,7 +258,7 @@ func testUpdateOneCryptoVoteByFilter9_MissingNameData(t *testing.T) {
 	atualiza com empty symbol CryptoVote
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter10_MissingSymbolData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter10_MissingSymbolData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
@@ -267,7 +272,7 @@ func testUpdateOneCryptoVoteByFilter10_MissingSymbolData(t *testing.T) {
 		Qtd_Downvote: 0,
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -277,7 +282,7 @@ func testUpdateOneCryptoVoteByFilter10_MissingSymbolData(t *testing.T) {
 	atualiza com campo symbol > 6 CryptoVote
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter11_SymbolTolargeData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter11_SymbolTolargeData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
@@ -291,7 +296,7 @@ func testUpdateOneCryptoVoteByFilter11_SymbolTolargeData(t *testing.T) {
 		Qtd_Downvote: 0,
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -301,7 +306,7 @@ func testUpdateOneCryptoVoteByFilter11_SymbolTolargeData(t *testing.T) {
 	atualiza com campo name > 30 CryptoVote
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter12_NameTolargeData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter12_NameTolargeData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
@@ -315,7 +320,7 @@ func testUpdateOneCryptoVoteByFilter12_NameTolargeData(t *testing.T) {
 		Qtd_Downvote: 0,
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -325,7 +330,7 @@ func testUpdateOneCryptoVoteByFilter12_NameTolargeData(t *testing.T) {
 	atualiza com os dados de symbol not unique
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter13_NotUniqueSymbolData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter13_NotUniqueSymbolData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
@@ -339,7 +344,7 @@ func testUpdateOneCryptoVoteByFilter13_NotUniqueSymbolData(t *testing.T) {
 	newCryptoData := listIn[0]
 	newCryptoData.Name = "Cacau Coin"
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -349,7 +354,7 @@ func testUpdateOneCryptoVoteByFilter13_NotUniqueSymbolData(t *testing.T) {
 	atualiza com os dados de name not unique
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter14_NotUniqueNameData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter14_NotUniqueNameData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
@@ -363,7 +368,7 @@ func testUpdateOneCryptoVoteByFilter14_NotUniqueNameData(t *testing.T) {
 	newCryptoData := listIn[0]
 	newCryptoData.Symbol = "CC"
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -373,7 +378,7 @@ func testUpdateOneCryptoVoteByFilter14_NotUniqueNameData(t *testing.T) {
 	atualiza com os dados de Qtd_Upvote menor que zero
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter15_UpvoteNegativeData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter15_UpvoteNegativeData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
@@ -387,7 +392,7 @@ func testUpdateOneCryptoVoteByFilter15_UpvoteNegativeData(t *testing.T) {
 		Qtd_Downvote: 0,
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }
@@ -397,7 +402,7 @@ func testUpdateOneCryptoVoteByFilter15_UpvoteNegativeData(t *testing.T) {
 	atualiza com os dados de Qtd_Downvote menor que zero
 	não faz a atualização
 */
-func testUpdateOneCryptoVoteByFilter16_DownvoteNegativeData(t *testing.T) {
+func testUpdateOneCryptoVoteByFilter16_DownvoteNegativeData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// criar um filtro válido de busca para fazer atualizações
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "Bitcoin",
@@ -411,7 +416,7 @@ func testUpdateOneCryptoVoteByFilter16_DownvoteNegativeData(t *testing.T) {
 		Qtd_Downvote: -1,
 	}
 
-	updatedCryptoVote, err := bo.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
+	updatedCryptoVote, err := cryptoVoteBO.UpdateOneCryptoVoteByFilter(filterCryptoVote, newCryptoData)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, updatedCryptoVote.Id.IsZero(), "should be true")
 }

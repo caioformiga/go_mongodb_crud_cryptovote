@@ -13,27 +13,32 @@ import (
 )
 
 func TestCreateCryptoVote(t *testing.T) {
-	testCreateCryptoVote0_Config(t)
-	testCreateCryptoVote1_ValidatedData(t)
-	testCreateCryptoVote2_DuplicatedData(t)
-	testCreateCryptoVote3_MissingNameData(t)
-	testCreateCryptoVote4_MissingSymbolData(t)
-	testCreateCryptoVote5_SymbolTolargeData(t)
-	testCreateCryptoVote6_NameTolargeData(t)
-	testCreateCryptoVote7_NotUniqueSymbolData(t)
-	testCreateCryptoVote8_NotUniqueNameData(t)
-	testCreateCryptoVote9_UpvoteNegativeData(t)
-	testCreateCryptoVote10_DownvoteNegativeData(t)
-	testCreateCryptoVote11_BadJsonData(t)
+	/*
+		Instância que permite acessar os metodos implementados em bo.CryptoVoteBO
+	*/
+	var cryptoVoteBO bo.InterfaceCryptoVoteBO = bo.CryptoVoteBO{}
+
+	testCreateCryptoVote0_Config(t, cryptoVoteBO)
+	testCreateCryptoVote1_ValidatedData(t, cryptoVoteBO)
+	testCreateCryptoVote2_DuplicatedData(t, cryptoVoteBO)
+	testCreateCryptoVote3_MissingNameData(t, cryptoVoteBO)
+	testCreateCryptoVote4_MissingSymbolData(t, cryptoVoteBO)
+	testCreateCryptoVote5_SymbolTolargeData(t, cryptoVoteBO)
+	testCreateCryptoVote6_NameTolargeData(t, cryptoVoteBO)
+	testCreateCryptoVote7_NotUniqueSymbolData(t, cryptoVoteBO)
+	testCreateCryptoVote8_NotUniqueNameData(t, cryptoVoteBO)
+	testCreateCryptoVote9_UpvoteNegativeData(t, cryptoVoteBO)
+	testCreateCryptoVote10_DownvoteNegativeData(t, cryptoVoteBO)
+	testCreateCryptoVote11_BadJsonData(t, cryptoVoteBO)
 }
 
 /*
 	configurando antes do teste
 	limpar todos os dados
 */
-func testCreateCryptoVote0_Config(t *testing.T) {
+func testCreateCryptoVote0_Config(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// limpa a coleção
-	_, err := bo.DeleteAllCryptoVote()
+	_, err := cryptoVoteBO.DeleteAllCryptoVote()
 	assert.Nil(t, err, "err should be nil")
 }
 
@@ -42,7 +47,7 @@ func testCreateCryptoVote0_Config(t *testing.T) {
 	tentativa com dados validos correto
 	espera que todos os registros sejam iguais a saida
 */
-func testCreateCryptoVote1_ValidatedData(t *testing.T) {
+func testCreateCryptoVote1_ValidatedData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// carrega json data com 3 CrypytoVotes
 	listIn, _ := utils.Load_data(utils.JsonInData)
 	listOut, _ := utils.Load_data(utils.JsonOutData)
@@ -50,7 +55,7 @@ func testCreateCryptoVote1_ValidatedData(t *testing.T) {
 
 	tam := len(listIn)
 	for i := 0; i < tam; i++ {
-		savedCrypoVote, err := bo.CreateCryptoVote(listIn[i])
+		savedCrypoVote, err := cryptoVoteBO.CreateCryptoVote(listIn[i])
 		validCrypo := listOut[i]
 		assert.Nil(t, err, "err should be nil")
 		assert.False(t, savedCrypoVote.Id.IsZero(), "savedCrypoVote.Id.IsZero() should not be false")
@@ -66,7 +71,7 @@ func testCreateCryptoVote1_ValidatedData(t *testing.T) {
 	tentativa com os mesmos dados
 	espera que retorne erro de validação
 */
-func testCreateCryptoVote2_DuplicatedData(t *testing.T) {
+func testCreateCryptoVote2_DuplicatedData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	var listIn []model.CryptoVote
 	var cryptoVote model.CryptoVote
 
@@ -74,7 +79,7 @@ func testCreateCryptoVote2_DuplicatedData(t *testing.T) {
 	for i := 0; i < tam; i++ {
 		cryptoVote = listIn[i]
 
-		_, err := bo.CreateCryptoVote(cryptoVote)
+		_, err := cryptoVoteBO.CreateCryptoVote(cryptoVote)
 		assert.NotNil(t, err, "err should not be nil")
 	}
 }
@@ -84,8 +89,8 @@ func testCreateCryptoVote2_DuplicatedData(t *testing.T) {
 	tentativa com empty name CryptoVote
 	espera que retorne erro de validação
 */
-func testCreateCryptoVote3_MissingNameData(t *testing.T) {
-	cryptoVote, err := bo.CreateCryptoVote(model.CryptoVote{
+func testCreateCryptoVote3_MissingNameData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
+	cryptoVote, err := cryptoVoteBO.CreateCryptoVote(model.CryptoVote{
 		Name:         "",
 		Symbol:       "FORM",
 		Qtd_Upvote:   0,
@@ -100,8 +105,8 @@ func testCreateCryptoVote3_MissingNameData(t *testing.T) {
 	tentativa com empty symbol CryptoVote
 	espera que retorne erro de validação em um campo
 */
-func testCreateCryptoVote4_MissingSymbolData(t *testing.T) {
-	cryptoVote, err := bo.CreateCryptoVote(model.CryptoVote{
+func testCreateCryptoVote4_MissingSymbolData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
+	cryptoVote, err := cryptoVoteBO.CreateCryptoVote(model.CryptoVote{
 		Name:         "FormiCOIN",
 		Symbol:       "",
 		Qtd_Upvote:   0,
@@ -116,8 +121,8 @@ func testCreateCryptoVote4_MissingSymbolData(t *testing.T) {
 	tentativa com campo symbol > 6 CryptoVote
 	espera que retorne erro de validação do tamanho do campo symbol
 */
-func testCreateCryptoVote5_SymbolTolargeData(t *testing.T) {
-	cryptoVote, err := bo.CreateCryptoVote(model.CryptoVote{
+func testCreateCryptoVote5_SymbolTolargeData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
+	cryptoVote, err := cryptoVoteBO.CreateCryptoVote(model.CryptoVote{
 		Name:         "Bitcoin",
 		Symbol:       "BTCBTCBTC",
 		Qtd_Upvote:   0,
@@ -132,8 +137,8 @@ func testCreateCryptoVote5_SymbolTolargeData(t *testing.T) {
 	tentativa com campo name > 30 CryptoVote
 	espera que retorne erro de validação do tamanho do campo symbol
 */
-func testCreateCryptoVote6_NameTolargeData(t *testing.T) {
-	cryptoVote, err := bo.CreateCryptoVote(model.CryptoVote{
+func testCreateCryptoVote6_NameTolargeData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
+	cryptoVote, err := cryptoVoteBO.CreateCryptoVote(model.CryptoVote{
 		Name:         "Formitcoinhjauheauhuehuahueuauehuahuheuahuehua",
 		Symbol:       "FORM",
 		Qtd_Upvote:   0,
@@ -148,12 +153,12 @@ func testCreateCryptoVote6_NameTolargeData(t *testing.T) {
 	tentativa com os dados de symbol igual e nome unique
 	espera que retorne erro de validação
 */
-func testCreateCryptoVote7_NotUniqueSymbolData(t *testing.T) {
+func testCreateCryptoVote7_NotUniqueSymbolData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	listIn, _ := utils.Load_data(utils.JsonInData)
 	cryptoVote := listIn[0]
 
 	cryptoVote.Name = "Cacau Coin"
-	_, err := bo.CreateCryptoVote(cryptoVote)
+	_, err := cryptoVoteBO.CreateCryptoVote(cryptoVote)
 	assert.NotNil(t, err, "err should not be nil")
 }
 
@@ -162,12 +167,12 @@ func testCreateCryptoVote7_NotUniqueSymbolData(t *testing.T) {
 	tentativa com os dados de nome igual e symbol unique
 	espera que retorne erro de validação
 */
-func testCreateCryptoVote8_NotUniqueNameData(t *testing.T) {
+func testCreateCryptoVote8_NotUniqueNameData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	listIn, _ := utils.Load_data(utils.JsonInData)
 	cryptoVote := listIn[0]
 
 	cryptoVote.Symbol = "CC"
-	_, err := bo.CreateCryptoVote(cryptoVote)
+	_, err := cryptoVoteBO.CreateCryptoVote(cryptoVote)
 	assert.NotNil(t, err, "err should not be nil")
 }
 
@@ -176,7 +181,7 @@ func testCreateCryptoVote8_NotUniqueNameData(t *testing.T) {
 	tentativa com os dados de Qtd_Upvote menor que zero
 	espera que retorne erro de validação
 */
-func testCreateCryptoVote9_UpvoteNegativeData(t *testing.T) {
+func testCreateCryptoVote9_UpvoteNegativeData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	var cryptoVote = model.CryptoVote{
 		Id:           [12]byte{},
 		Name:         "Cacau Coin",
@@ -185,7 +190,7 @@ func testCreateCryptoVote9_UpvoteNegativeData(t *testing.T) {
 		Qtd_Downvote: 0,
 	}
 
-	_, err := bo.CreateCryptoVote(cryptoVote)
+	_, err := cryptoVoteBO.CreateCryptoVote(cryptoVote)
 	assert.NotNil(t, err, "err should not be nil")
 }
 
@@ -194,7 +199,7 @@ func testCreateCryptoVote9_UpvoteNegativeData(t *testing.T) {
 	tentativa com os dados de Qtd_Downvote menor que zero
 	espera que retorne erro de validação
 */
-func testCreateCryptoVote10_DownvoteNegativeData(t *testing.T) {
+func testCreateCryptoVote10_DownvoteNegativeData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	var cryptoVote = model.CryptoVote{
 		Name:         "Cacau Coin",
 		Symbol:       "CC",
@@ -202,7 +207,7 @@ func testCreateCryptoVote10_DownvoteNegativeData(t *testing.T) {
 		Qtd_Downvote: -1,
 	}
 
-	_, err := bo.CreateCryptoVote(cryptoVote)
+	_, err := cryptoVoteBO.CreateCryptoVote(cryptoVote)
 	assert.NotNil(t, err, "err should not be nil")
 }
 
@@ -211,7 +216,7 @@ func testCreateCryptoVote10_DownvoteNegativeData(t *testing.T) {
 	tentativa com os dados malfomatados no json
 	espera que retorne erro de validação
 */
-func testCreateCryptoVote11_BadJsonData(t *testing.T) {
+func testCreateCryptoVote11_BadJsonData(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	var ptr *[]model.CryptoVote
 	err := json.Unmarshal(utils.JsonBadData, &ptr)
 	assert.NotNil(t, err, "err should not be nil")

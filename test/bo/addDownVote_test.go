@@ -11,14 +11,19 @@ import (
 )
 
 func TestAddDownVote(t *testing.T) {
-	testAddDownVote0_Config(t)
-	testAddDownVote1_FilterByName(t)
-	testAddDownVote2_FilterBySymbol(t)
-	testAddDownVote3_FilterMissMatch(t)
-	testAddDownVote4_FormatArgs(t)
-	testAddDownVote5_EmptyArg(t)
-	testAddDownVote6_SumaryValid(t)
-	testAddDownVote7_SumaryWrong(t)
+	/*
+		Instância que permite acessar os metodos implementados em bo.CryptoVoteBO
+	*/
+	var cryptoVoteBO bo.InterfaceCryptoVoteBO = bo.CryptoVoteBO{}
+
+	testAddDownVote0_Config(t, cryptoVoteBO)
+	testAddDownVote1_FilterByName(t, cryptoVoteBO)
+	testAddDownVote2_FilterBySymbol(t, cryptoVoteBO)
+	testAddDownVote3_FilterMissMatch(t, cryptoVoteBO)
+	testAddDownVote4_FormatArgs(t, cryptoVoteBO)
+	testAddDownVote5_EmptyArg(t, cryptoVoteBO)
+	testAddDownVote6_SumaryValid(t, cryptoVoteBO)
+	testAddDownVote7_SumaryWrong(t, cryptoVoteBO)
 }
 
 /*
@@ -27,9 +32,9 @@ func TestAddDownVote(t *testing.T) {
 	remove todos os dados
 	insere 3 dados
 */
-func testAddDownVote0_Config(t *testing.T) {
+func testAddDownVote0_Config(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// limpa a coleção
-	_, err := bo.DeleteAllCryptoVote()
+	_, err := cryptoVoteBO.DeleteAllCryptoVote()
 	assert.Nil(t, err, "err should be nil")
 
 	// carrega json data com 3 CrypytoVotes
@@ -40,7 +45,7 @@ func testAddDownVote0_Config(t *testing.T) {
 	for i := 0; i < tam; i++ {
 		cryptoVote := listIn[i]
 
-		_, err := bo.CreateCryptoVote(cryptoVote)
+		_, err := cryptoVoteBO.CreateCryptoVote(cryptoVote)
 		assert.Nil(t, err, "err should be nil")
 	}
 }
@@ -50,11 +55,11 @@ func testAddDownVote0_Config(t *testing.T) {
 	adiciona 1 voto em Downvote usando filtro de name
 	confirma voto
 */
-func testAddDownVote1_FilterByName(t *testing.T) {
+func testAddDownVote1_FilterByName(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	name := "Klever"
 	symbol := ""
 
-	beforeCrypto, err := bo.RetrieveOneCryptoVote(name, symbol)
+	beforeCrypto, err := cryptoVoteBO.RetrieveOneCryptoVote(name, symbol)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, beforeCrypto.Symbol, "should not be nil")
 
@@ -64,7 +69,7 @@ func testAddDownVote1_FilterByName(t *testing.T) {
 		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
 	}
 
-	cryptoVote, err := bo.AddDownVote(filterCryptoVote)
+	cryptoVote, err := cryptoVoteBO.AddDownVote(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, cryptoVote.Symbol, "should not be nil")
 
@@ -79,10 +84,10 @@ func testAddDownVote1_FilterByName(t *testing.T) {
 	adiciona 1 voto em Downvote usando filtro de symbol
 	confirma voto
 */
-func testAddDownVote2_FilterBySymbol(t *testing.T) {
+func testAddDownVote2_FilterBySymbol(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	name := ""
 	symbol := "KLV"
-	beforeCrypto, err := bo.RetrieveOneCryptoVote(name, symbol)
+	beforeCrypto, err := cryptoVoteBO.RetrieveOneCryptoVote(name, symbol)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, beforeCrypto.Name, "should not be nil")
 
@@ -92,7 +97,7 @@ func testAddDownVote2_FilterBySymbol(t *testing.T) {
 		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
 	}
 
-	cryptoVote, err := bo.AddDownVote(filterCryptoVote)
+	cryptoVote, err := cryptoVoteBO.AddDownVote(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, cryptoVote.Name, "should not be nil")
 
@@ -110,10 +115,10 @@ func testAddDownVote2_FilterBySymbol(t *testing.T) {
 	symbol := "KLV"
 	erro nenhum documento localizado
 */
-func testAddDownVote3_FilterMissMatch(t *testing.T) {
+func testAddDownVote3_FilterMissMatch(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	name := "Bitcoin"
 	symbol := "KLV"
-	beforeCrypto, err := bo.RetrieveOneCryptoVote(name, symbol)
+	beforeCrypto, err := cryptoVoteBO.RetrieveOneCryptoVote(name, symbol)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, beforeCrypto.Id.IsZero(), " should be true")
 
@@ -123,7 +128,7 @@ func testAddDownVote3_FilterMissMatch(t *testing.T) {
 		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
 	}
 
-	cryptoVote, err := bo.AddDownVote(filterCryptoVote)
+	cryptoVote, err := cryptoVoteBO.AddDownVote(filterCryptoVote)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, cryptoVote.Id.IsZero(), " should be true")
 }
@@ -135,10 +140,10 @@ func testAddDownVote3_FilterMissMatch(t *testing.T) {
 	symbol := "btc"
 	encontra Bitcoin BTC
 */
-func testAddDownVote4_FormatArgs(t *testing.T) {
+func testAddDownVote4_FormatArgs(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	name := "BitCOIN"
 	symbol := "btc"
-	beforeCrypto, err := bo.RetrieveOneCryptoVote(name, symbol)
+	beforeCrypto, err := cryptoVoteBO.RetrieveOneCryptoVote(name, symbol)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, beforeCrypto.Id.IsZero(), "err should not be nil")
 
@@ -148,7 +153,7 @@ func testAddDownVote4_FormatArgs(t *testing.T) {
 		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
 	}
 
-	cryptoVote, err := bo.AddDownVote(filterCryptoVote)
+	cryptoVote, err := cryptoVoteBO.AddDownVote(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, cryptoVote.Id.IsZero(), "err should not be nil")
 
@@ -163,10 +168,10 @@ func testAddDownVote4_FormatArgs(t *testing.T) {
 	adiciona 1 voto em Downvote usando filter com args (name e symbol) empty
 	erro de validação
 */
-func testAddDownVote5_EmptyArg(t *testing.T) {
+func testAddDownVote5_EmptyArg(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	name := ""
 	symbol := ""
-	beforeCrypto, err := bo.RetrieveOneCryptoVote(name, symbol)
+	beforeCrypto, err := cryptoVoteBO.RetrieveOneCryptoVote(name, symbol)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, beforeCrypto.Id.IsZero(), " should be true")
 
@@ -176,7 +181,7 @@ func testAddDownVote5_EmptyArg(t *testing.T) {
 		Symbol: strings.ToUpper(strings.TrimSpace(symbol)),
 	}
 
-	cryptoVote, err := bo.AddDownVote(filterCryptoVote)
+	cryptoVote, err := cryptoVoteBO.AddDownVote(filterCryptoVote)
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, cryptoVote.Id.IsZero(), " should be true")
 }
@@ -185,14 +190,14 @@ func testAddDownVote5_EmptyArg(t *testing.T) {
 	6
 	adiciona votos alterar sumary
 */
-func testAddDownVote6_SumaryValid(t *testing.T) {
+func testAddDownVote6_SumaryValid(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// cria model vazio que sera convertido para filtro vazio
 	var filterCryptoVote = model.FilterCryptoVote{}
 	filterCryptoVote.Name = "Crypto Para Teste de Sum"
 	filterCryptoVote.Symbol = "CCC"
 
 	//tenta localizar uma CCC
-	cccCryptoVote, err := bo.RetrieveOneCryptoVote("", filterCryptoVote.Symbol)
+	cccCryptoVote, err := cryptoVoteBO.RetrieveOneCryptoVote("", filterCryptoVote.Symbol)
 	if err != nil {
 		cccCryptoVote = model.CryptoVote{
 			Id:           [12]byte{},
@@ -202,21 +207,21 @@ func testAddDownVote6_SumaryValid(t *testing.T) {
 			Qtd_Downvote: 0,
 			Sum:          0,
 		}
-		_, err := bo.CreateCryptoVote(cccCryptoVote)
+		_, err := cryptoVoteBO.CreateCryptoVote(cccCryptoVote)
 		assert.Nil(t, err, "err should be nil")
 	}
 
 	// adiciona 10 votos para crypto
 	for i := 0; i < 10; i++ {
-		_, err := bo.AddDownVote(filterCryptoVote)
+		_, err := cryptoVoteBO.AddDownVote(filterCryptoVote)
 		assert.Nil(t, err, "err should be nil")
 	}
-	crypto, err := bo.RetrieveOneCryptoVote("", filterCryptoVote.Symbol)
+	crypto, err := cryptoVoteBO.RetrieveOneCryptoVote("", filterCryptoVote.Symbol)
 	assert.Nil(t, err, "err should be nil")
 	assert.Equal(t, crypto.Sum, -10, "Sum should be equal")
 
 	// remove a crypyo
-	_, err = bo.DeleteAllCryptoVoteByFilter(filterCryptoVote)
+	_, err = cryptoVoteBO.DeleteAllCryptoVoteByFilter(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 }
 
@@ -224,14 +229,14 @@ func testAddDownVote6_SumaryValid(t *testing.T) {
 	7
 	adiciona votos alterar sumary
 */
-func testAddDownVote7_SumaryWrong(t *testing.T) {
+func testAddDownVote7_SumaryWrong(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// cria model vazio que sera convertido para filtro vazio
 	var filterCryptoVote = model.FilterCryptoVote{}
 	filterCryptoVote.Name = "Crypto Para Teste de Sum"
 	filterCryptoVote.Symbol = "CCC"
 
 	//tenta localizar uma CCC
-	cccCryptoVote, err := bo.RetrieveOneCryptoVote("", filterCryptoVote.Symbol)
+	cccCryptoVote, err := cryptoVoteBO.RetrieveOneCryptoVote("", filterCryptoVote.Symbol)
 	if err != nil {
 		cccCryptoVote = model.CryptoVote{
 			Id:           [12]byte{},
@@ -241,20 +246,20 @@ func testAddDownVote7_SumaryWrong(t *testing.T) {
 			Qtd_Downvote: 0,
 			Sum:          0,
 		}
-		_, err := bo.CreateCryptoVote(cccCryptoVote)
+		_, err := cryptoVoteBO.CreateCryptoVote(cccCryptoVote)
 		assert.Nil(t, err, "err should be nil")
 	}
 
 	// adiciona 5 votos para crypto
 	for i := 0; i < 5; i++ {
-		_, err := bo.AddDownVote(filterCryptoVote)
+		_, err := cryptoVoteBO.AddDownVote(filterCryptoVote)
 		assert.Nil(t, err, "err should be nil")
 	}
-	crypto, err := bo.RetrieveOneCryptoVote("", filterCryptoVote.Symbol)
+	crypto, err := cryptoVoteBO.RetrieveOneCryptoVote("", filterCryptoVote.Symbol)
 	assert.Nil(t, err, "err should be nil")
 	assert.NotEqual(t, crypto.Sum, 10, "Sum should not be equal")
 
 	// remove a crypyo
-	_, err = bo.DeleteAllCryptoVoteByFilter(filterCryptoVote)
+	_, err = cryptoVoteBO.DeleteAllCryptoVoteByFilter(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 }

@@ -13,10 +13,18 @@ import (
 )
 
 /*
+	Não existe uma declaração explicita de que um tipo (struct) implementa uma interface.
+	Isso acontece quando um tipo implementa todo os metodos da interface, como este tipo
+	dao.CryptoVoteDAO implementa os 6 metodos de dao.InterfaceMongodbDAO
+*/
+type CryptoVoteDAO struct {
+}
+
+/*
 	Função para criar um registro
 	usa na entrada um model.CryptoVote struct criado em outra camada
 */
-func CreateCryptoVote(mongodbClient *mongo.Client, cryptoVote model.CryptoVote) (*mongo.InsertOneResult, error) {
+func (c CryptoVoteDAO) CreateCryptoVote(mongodbClient *mongo.Client, cryptoVote model.CryptoVote) (*mongo.InsertOneResult, error) {
 	// antes de salvar no mongo faz a soma
 	cryptoVote.Sum = cryptoVote.Qtd_Upvote - cryptoVote.Qtd_Downvote
 
@@ -35,7 +43,7 @@ func CreateCryptoVote(mongodbClient *mongo.Client, cryptoVote model.CryptoVote) 
 	Função para deletar varios registros
 	usa na entrada filter := bson.M{"symbol": "KLV"}
 */
-func DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.DeleteResult, error) {
+func (c CryptoVoteDAO) DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.DeleteResult, error) {
 	//criar um contexto com deadline de 10 segundos
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -51,7 +59,7 @@ func DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.De
 	Função para recuperar vários registros de model.CryptoVote
 	usa na entrada filter := bson.M{"symbol": "KLV"}
 */
-func FindOneCryptoVote(mongodbClient *mongo.Client, filter bson.M) (model.CryptoVote, error) {
+func (c CryptoVoteDAO) FindOneCryptoVote(mongodbClient *mongo.Client, filter bson.M) (model.CryptoVote, error) {
 	var oneCryptoVote model.CryptoVote
 
 	//criar um contexto com deadline de 10 segundos
@@ -69,7 +77,7 @@ func FindOneCryptoVote(mongodbClient *mongo.Client, filter bson.M) (model.Crypto
 	Função para recuperar vários registros de model.CryptoVote
 	usa na entrada filter := bson.M{"symbol": "KLV"}
 */
-func FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.CryptoVote, error) {
+func (c CryptoVoteDAO) FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.CryptoVote, error) {
 	var oneCryptoVote model.CryptoVote
 	var manyCryptoVotes []model.CryptoVote
 
@@ -99,7 +107,7 @@ func FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.Cry
 /*
 	Função para recuperar vários registros de model.CryptoVote
 */
-func FindManyCryptoVoteLimitedSortedByField(mongodbClient *mongo.Client, filter bson.M, limit int64, sortFieldName string, orderType int) ([]model.CryptoVote, error) {
+func (c CryptoVoteDAO) FindManyCryptoVoteLimitedSortedByField(mongodbClient *mongo.Client, filter bson.M, limit int64, sortFieldName string, orderType int) ([]model.CryptoVote, error) {
 	var oneCryptoVote model.CryptoVote
 	var manyCryptoVotes []model.CryptoVote
 
@@ -138,7 +146,7 @@ func FindManyCryptoVoteLimitedSortedByField(mongodbClient *mongo.Client, filter 
 
 	usa na entrada newData := bson.M{"name": "New Data"}
 */
-func UpdateOneCryptoVote(mongodbClient *mongo.Client, filter bson.M, newData bson.M) (model.CryptoVote, error) {
+func (c CryptoVoteDAO) UpdateOneCryptoVote(mongodbClient *mongo.Client, filter bson.M, newData bson.M) (model.CryptoVote, error) {
 	var oneCryptoVote model.CryptoVote
 
 	//criar um contexto com deadline de 10 segundos

@@ -10,8 +10,13 @@ import (
 )
 
 func TestDeleteAllCryptoVoteByFilter(t *testing.T) {
-	testDeleteAllCryptoVoteByFilter0_Config(t)
-	testDeleteAllCryptoVoteByFilter1_FilterNull(t)
+	/*
+		Instância que permite acessar os metodos implementados em bo.CryptoVoteBO
+	*/
+	var cryptoVoteBO bo.InterfaceCryptoVoteBO = bo.CryptoVoteBO{}
+
+	testDeleteAllCryptoVoteByFilter0_Config(t, cryptoVoteBO)
+	testDeleteAllCryptoVoteByFilter1_FilterNull(t, cryptoVoteBO)
 }
 
 /*
@@ -19,7 +24,7 @@ func TestDeleteAllCryptoVoteByFilter(t *testing.T) {
 	configurando antes do teste
 	insere dados
 */
-func testDeleteAllCryptoVoteByFilter0_Config(t *testing.T) {
+func testDeleteAllCryptoVoteByFilter0_Config(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// carrega json data com 3 CrypytoVotes
 	// usa func do arquivo default_data.go
 	listIn, err := utils.Load_data(utils.JsonInData)
@@ -32,7 +37,7 @@ func testDeleteAllCryptoVoteByFilter0_Config(t *testing.T) {
 	for i := 0; i < tam; i++ {
 		cryptoVote := listIn[i]
 
-		_, err := bo.CreateCryptoVote(cryptoVote)
+		_, err := cryptoVoteBO.CreateCryptoVote(cryptoVote)
 		assert.NotNil(t, err, "err should not be nil")
 	}
 }
@@ -42,17 +47,17 @@ func testDeleteAllCryptoVoteByFilter0_Config(t *testing.T) {
 	remove todos os registros usando filter null
 	compara totalCount com deletedCount
 */
-func testDeleteAllCryptoVoteByFilter1_FilterNull(t *testing.T) {
+func testDeleteAllCryptoVoteByFilter1_FilterNull(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// cria model vazio que sera convertido para filtro vazio
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
 		Symbol: "",
 	}
-	list, _ := bo.RetrieveAllCryptoVoteByFilter(filterCryptoVote)
+	list, _ := cryptoVoteBO.RetrieveAllCryptoVoteByFilter(filterCryptoVote)
 	totalCount := int64(len(list))
 
 	// limpa a coleção
-	deletedCount, err := bo.DeleteAllCryptoVote()
+	deletedCount, err := cryptoVoteBO.DeleteAllCryptoVote()
 	assert.Nil(t, err, "err should be nil")
 	assert.Equal(t, deletedCount, totalCount, "they should be equal")
 }

@@ -9,12 +9,17 @@ import (
 )
 
 func TestRetrieveOneCryptoVote(t *testing.T) {
-	testRetrieveOneCryptoVote0_Config(t)
-	testRetrieveOneCryptoVote1_FilterByName(t)
-	testRetrieveOneCryptoVote2_FilterBySymbol(t)
-	testRetrieveOneCryptoVote3_FilterMissMatch(t)
-	testRetrieveOneCryptoVote4_FormatArg(t)
-	testRetrieveOneCryptoVote5_EmptyArgs(t)
+	/*
+		Instância que permite acessar os metodos implementados em bo.CryptoVoteBO
+	*/
+	var cryptoVoteBO bo.InterfaceCryptoVoteBO = bo.CryptoVoteBO{}
+
+	testRetrieveOneCryptoVote0_Config(t, cryptoVoteBO)
+	testRetrieveOneCryptoVote1_FilterByName(t, cryptoVoteBO)
+	testRetrieveOneCryptoVote2_FilterBySymbol(t, cryptoVoteBO)
+	testRetrieveOneCryptoVote3_FilterMissMatch(t, cryptoVoteBO)
+	testRetrieveOneCryptoVote4_FormatArg(t, cryptoVoteBO)
+	testRetrieveOneCryptoVote5_EmptyArgs(t, cryptoVoteBO)
 }
 
 /*
@@ -23,9 +28,9 @@ func TestRetrieveOneCryptoVote(t *testing.T) {
 	remove todos os dados
 	insere 3 dados
 */
-func testRetrieveOneCryptoVote0_Config(t *testing.T) {
+func testRetrieveOneCryptoVote0_Config(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	// limpa a coleção
-	_, err := bo.DeleteAllCryptoVote()
+	_, err := cryptoVoteBO.DeleteAllCryptoVote()
 	assert.Nil(t, err, "err should be nil")
 
 	// carrega json data com 3 CrypytoVotes
@@ -36,7 +41,7 @@ func testRetrieveOneCryptoVote0_Config(t *testing.T) {
 	for i := 0; i < tam; i++ {
 		cryptoVote := listIn[i]
 
-		_, err := bo.CreateCryptoVote(cryptoVote)
+		_, err := cryptoVoteBO.CreateCryptoVote(cryptoVote)
 		assert.Nil(t, err, "err should be nil")
 	}
 }
@@ -46,10 +51,10 @@ func testRetrieveOneCryptoVote0_Config(t *testing.T) {
 	recupera todos os registros usando filter
 	name = "Klever"
 */
-func testRetrieveOneCryptoVote1_FilterByName(t *testing.T) {
+func testRetrieveOneCryptoVote1_FilterByName(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	name := "Klever"
 	symbol := ""
-	crypto, err := bo.RetrieveOneCryptoVote(name, symbol)
+	crypto, err := cryptoVoteBO.RetrieveOneCryptoVote(name, symbol)
 
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, crypto.Id.IsZero(), "err should nnot be nil")
@@ -61,10 +66,10 @@ func testRetrieveOneCryptoVote1_FilterByName(t *testing.T) {
 	recupera todos os registros usando filter
 	Symbol = "KLV"
 */
-func testRetrieveOneCryptoVote2_FilterBySymbol(t *testing.T) {
+func testRetrieveOneCryptoVote2_FilterBySymbol(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	name := ""
 	symbol := "KLV"
-	crypto, err := bo.RetrieveOneCryptoVote(name, symbol)
+	crypto, err := cryptoVoteBO.RetrieveOneCryptoVote(name, symbol)
 
 	assert.Nil(t, err, "err should be nil")
 	assert.NotNil(t, crypto.Id.IsZero(), "should not be nil")
@@ -79,10 +84,10 @@ func testRetrieveOneCryptoVote2_FilterBySymbol(t *testing.T) {
 	symbol := "KLV"
 	erro nenhum documento localizado
 */
-func testRetrieveOneCryptoVote3_FilterMissMatch(t *testing.T) {
+func testRetrieveOneCryptoVote3_FilterMissMatch(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	name := "Bitcoin"
 	symbol := "KLV"
-	cryptoVote, err := bo.RetrieveOneCryptoVote(name, symbol)
+	cryptoVote, err := cryptoVoteBO.RetrieveOneCryptoVote(name, symbol)
 
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, cryptoVote.Id.IsZero(), " should be true")
@@ -95,10 +100,10 @@ func testRetrieveOneCryptoVote3_FilterMissMatch(t *testing.T) {
 	symbol := "btc"
 	encontra Bitcoin BTC
 */
-func testRetrieveOneCryptoVote4_FormatArg(t *testing.T) {
+func testRetrieveOneCryptoVote4_FormatArg(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	name := "BitCOIN"
 	symbol := "btc"
-	cryptoVote, err := bo.RetrieveOneCryptoVote(name, symbol)
+	cryptoVote, err := cryptoVoteBO.RetrieveOneCryptoVote(name, symbol)
 
 	assert.Nil(t, err, "err should be nil")
 	assert.False(t, cryptoVote.Id.IsZero(), " should be true")
@@ -109,10 +114,10 @@ func testRetrieveOneCryptoVote4_FormatArg(t *testing.T) {
 	recupera todos os registros usando filter com args (name e symbol) empty
 	erro de validação
 */
-func testRetrieveOneCryptoVote5_EmptyArgs(t *testing.T) {
+func testRetrieveOneCryptoVote5_EmptyArgs(t *testing.T, cryptoVoteBO bo.InterfaceCryptoVoteBO) {
 	name := ""
 	symbol := ""
-	cryptoVote, err := bo.RetrieveOneCryptoVote(name, symbol)
+	cryptoVote, err := cryptoVoteBO.RetrieveOneCryptoVote(name, symbol)
 
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, cryptoVote.Id.IsZero(), " should be true")
