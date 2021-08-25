@@ -1,13 +1,11 @@
 package utils
 
-//
 /*
-	Abs retorna o valor absoluto de x
-	Warning: The smallest value of a signed integer doesn’t have a matching positive value.
-	math.MinInt64 is -9223372036854775808, but
-	math.MaxInt64 is 9223372036854775807.
-	Unfortunately, our Abs function returns a negative value in this case.
+	Abs returns the absolute value of x, case -1, return 1.
 
+	Warning: The smallest value of a signed integer does not have a
+	corresponding positive value, see details at:
+	[https://yourbasic.org/golang/absolute-value-int-float/]
 */
 func Abs(x int) int {
 	a := int64(x)
