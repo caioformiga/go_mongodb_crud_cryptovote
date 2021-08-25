@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 
-	"github.com/caioformiga/go_mongodb_crud_cryptovote/dao"
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -45,101 +44,86 @@ func validateCryptoVoteArgumentNotNegative(arg int) bool {
 }
 
 /*
-	ValidateCryptoVoteArguments verifica se algum campo está fora do valor defalt
-	não atente aos critérios de unique abaixo
-	Name não pode ser vazio
-	Symbol não pode ser vazio
-	Qtd_Upvote não pode ser menor do que zero
-	Qtd_Downvote não pode ser menor do que zero
+	Checks each field using below criteria:
+	Name cannot be empty
+	Symbol cannot be empty
+	Qtd_Upvote cannot be less than zero
+	Qtd_Downvote cannot be less than zero
 */
 func ValidateCryptoVoteArguments(crypto model.CryptoVote) (bool, error) {
 	var validate bool = false
 
 	validate = validateCryptoVoteArgumentNotEmpty(crypto.Name)
 	if !validate {
-		return validate, errors.New("[cryptovote.validationBO] name não pode ser vazio")
+		return validate, errors.New("[cryptovote.validationBO] name can't be null")
 	}
 
 	validate = validateCryptoVoteArgumentLenght(crypto.Name, 30)
 	if !validate {
-		return validate, errors.New("[cryptovote.validationBO] name não pode ter maior do que 30 caracteres")
+		return validate, errors.New("[cryptovote.validationBO] name can't have more than 30 characters")
 	}
 
 	validate = validateCryptoVoteArgumentNotEmpty(crypto.Symbol)
 	if !validate {
-		return validate, errors.New("[cryptovote.validationBO] symbol não pode ser vazio")
+		return validate, errors.New("[cryptovote.validationBO] symbol can't be null")
 	}
 
 	validate = validateCryptoVoteArgumentLenght(crypto.Symbol, 6)
 	if !validate {
-		return validate, errors.New("[cryptovote.validationBO] name não pode ter maior do que 6 caracteres")
+		return validate, errors.New("[cryptovote.validationBO] name can't have more than 6 characters")
 	}
 
 	validate = validateCryptoVoteArgumentNotNegative(crypto.Qtd_Upvote)
 	if !validate {
 		validate = false
-		return validate, errors.New("[cryptovote.validationBO] qtd_upvote não pode ser menor do que zero")
+		return validate, errors.New("[cryptovote.validationBO] qtd_upvote can't have less then zero")
 	}
 
 	validate = validateCryptoVoteArgumentNotNegative(crypto.Qtd_Downvote)
 	if !validate {
 		validate = false
 		validate = false
-		return validate, errors.New("[cryptovote.validationBO] qtd_downvote não pode ser menor do que zero")
+		return validate, errors.New("[cryptovote.validationBO] qtd_downvote can't have less then zero")
 	}
 	return validate, nil
 }
 
-func validateUnique(key string, value string) (bool, error) {
-	var validate bool = true
+func (c CryptoVoteBO) validateUnique(key string, value string) (bool, error) {
 	var retrivedCryptoVotes []model.CryptoVote
+	var err error
 
-	dao.SetCollectionName("cryptovotes")
-
-	// usa a função criada no pacote dao
-	mongodbClient, err := dao.GetMongoClientInstance()
+	// use function from dao package
+	retrivedCryptoVotes, err = c.ImplDAO.FindMany(bson.M{key: value})
 	if err != nil {
-		z := "Problemas no uso de GetMongoClientInstance: " + err.Error()
+		z := "Problems using FindManyCryptoVote: " + err.Error()
 		log.Print(z)
 	}
 
-	// usa a função criada no pacote dao
-	retrivedCryptoVotes, err = mongodbDAO.FindManyCryptoVote(mongodbClient, bson.M{key: value})
-	if err != nil {
-		z := "Problemas no uso de FindManyCryptoVote: " + err.Error()
-		log.Print(z)
-	}
+	var validate bool = true
 
-	if retrivedCryptoVotes != nil {
+	if len(retrivedCryptoVotes) > 0 {
 		validate = false
-		return validate, errors.New("[cryptovote.validationBO] campo(" + key + ") informado já exite, escolha outro diferente de " + value)
+		return validate, errors.New("[cryptovote.validationBO] field(" + key + ") already exists, choose anoter value different from " + value)
 	}
 	return validate, err
 }
 
-func validateCryptoVoteUniqueSymbol(value string) (bool, error) {
-	key := "symbol"
-	return validateUnique(key, value)
-}
-
-func validateCryptoVoteUniqueName(value string) (bool, error) {
-	key := "name"
-	return validateUnique(key, value)
-}
-
 /*
-	ValidateCryptoVoteUniqueData verifica se não existe no banco alguma CryptoVote que
-	não atente aos critérios de unique abaixo
+	Check if there is a CryptoVote with similar data, usgin unique criteria below:
 	name : unique
 	symbol : unique
 */
-func ValidateCryptoVoteUniqueData(name string, symbol string) (bool, error) {
+func (c CryptoVoteBO) ValidateCryptoVoteUniqueData(name string, symbol string) (bool, error) {
 	var validate bool = false
+	var key string
+	var value string
 	var err error
 
 	// se não for vazio
 	if len(name) > 0 {
-		validate, err = validateCryptoVoteUniqueName(name)
+		key = "name"
+		value = name
+		validate, err = c.validateUnique(key, value)
 		if !validate {
 			return validate, err
 		}
@@ -147,7 +131,9 @@ func ValidateCryptoVoteUniqueData(name string, symbol string) (bool, error) {
 
 	// se não for vazio
 	if len(symbol) > 0 {
-		validate, err = validateCryptoVoteUniqueSymbol(symbol)
+		key = "symbol"
+		value = symbol
+		validate, err = c.validateUnique(key, value)
 		if !validate {
 			return validate, err
 		}
@@ -156,31 +142,23 @@ func ValidateCryptoVoteUniqueData(name string, symbol string) (bool, error) {
 }
 
 /*
-	ValidateCryptoVote recebe os campos e faz a validação
-	name : não pode ser vazio, len(name) > 0
-	symbol : não pode ser vazio, len(name) > 0
-	qtd_upvote : não pode ser menor do que zero, qtd_upvote >= 0
-	qtd_downvote : não pode ser menor do que zero, qtd_upvote >= 0
+	External function to handle all validation process
 */
-func ValidateCryptoVote(crypto model.CryptoVote) (bool, error) {
+func (c CryptoVoteBO) ValidateCryptoVote(crypto model.CryptoVote) (bool, error) {
 	var validate = false
 	var err error
 
-	// usa a função criada no pacote bo
+	// uses function from bo package
 	validate, err = ValidateCryptoVoteArguments(crypto)
 	if err != nil {
-		z := "Problemas na validação de dados da nova CryptoVote: " + err.Error()
-		log.Print(z)
 		return validate, err
 	} else {
 		validate = true
 	}
 
-	// usa a função criada no pacote bo
-	validate, err = ValidateCryptoVoteUniqueData(crypto.Name, crypto.Symbol)
+	// uses function from bo package
+	validate, err = c.ValidateCryptoVoteUniqueData(crypto.Name, crypto.Symbol)
 	if err != nil {
-		z := "Problemas na validação unique da nova CryptoVote: " + err.Error()
-		log.Print(z)
 		return validate, err
 	} else {
 		validate = true
