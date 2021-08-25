@@ -2,86 +2,162 @@ package dao
 
 import (
 	"context"
+	"errors"
 	"time"
 
+	"github.com/caioformiga/go_mongodb_crud_cryptovote/interfaces"
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/model"
 
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 /*
-	Não existe uma declaração explicita de que um tipo (struct) implementa uma interface.
-	Isso acontece quando um tipo implementa todo os metodos da interface, como este tipo
-	dao.CryptoVoteDAO implementa os 6 metodos de dao.InterfaceMongodbDAO
+	In go, there is no explicit declaration (keyword) to set an inheritance relationship between classes,
+	as occurs in Java or Python, for example. There is the keyword interface, but this only indicates that
+	it is an abstract struct. A class that wants to be an implementation of an interface-type struct needs
+	to implement all the methods of the given interface.
+
+	CryptoVoteDAO implements all methods of interfaces.InterfaceCryptoVoteDAO
 */
 type CryptoVoteDAO struct {
+	dbService interfaces.InterfaceDbService
+}
+
+func NewCryptoVoteDAO() CryptoVoteDAO {
+	var d CryptoVoteDAO = CryptoVoteDAO{
+		// dao.MongodbService{} is a struct that makes the connection to the databse Mongodb
+		dbService: MongodbService{},
+	}
+	return d
+}
+
+func (c CryptoVoteDAO) GetDbService() interfaces.InterfaceDbService {
+	return c.dbService
+}
+
+func (c CryptoVoteDAO) SetDbService(service interfaces.InterfaceDbService) {
+	c.dbService = service
 }
 
 /*
-	Função para criar um registro
-	usa na entrada um model.CryptoVote struct criado em outra camada
+	Function uses a model.CryptoVote struct created at another layer and persist ir on database,
+	using mongodbClient.
 */
-func (c CryptoVoteDAO) CreateCryptoVote(mongodbClient *mongo.Client, cryptoVote model.CryptoVote) (*mongo.InsertOneResult, error) {
-	// antes de salvar no mongo faz a soma
+func (c CryptoVoteDAO) Create(cryptoVote model.CryptoVote) (model.CryptoVote, error) {
+	var savedCryptoVote model.CryptoVote
+
+	// uses function from dao package to start the mongo client
+	mongodbClient, err := GetMongoClientInstance(c.dbService)
+	if err != nil {
+		z := "[cryptovote.mongodb] Problems using GetMongoClientInstance: " + err.Error()
+		err = errors.New(z)
+		return savedCryptoVote, err
+	}
+
+	// before saving, do the math
 	cryptoVote.Sum = cryptoVote.Qtd_Upvote - cryptoVote.Qtd_Downvote
 
-	//criar um contexto com deadline de 10 segundos
+	// create a context with 10-second deadline
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	cryptoVoteCollection := mongodbClient.Database(db_name).Collection(collection_name)
 
 	insertResult, err := cryptoVoteCollection.InsertOne(mongoContext, cryptoVote)
-	return insertResult, err
+	if err != nil {
+		return savedCryptoVote, err
+	}
+
+	// creates filter with id to retrieve data
+	filter := bson.M{"_id": insertResult.InsertedID}
+
+	// uses function from dao package to start the mongo client
+	savedCryptoVote, err = c.FindOne(filter)
+	if err != nil {
+		z := "[cryptovote.mongodb] Problemas na execução de c.FindOne: " + err.Error()
+		err = errors.New(z)
+		return savedCryptoVote, err
+	}
+	return savedCryptoVote, err
 }
 
-//Função para deletar
 /*
-	Função para deletar varios registros
-	usa na entrada filter := bson.M{"symbol": "KLV"}
+	Function to delete multiple records using a filter.
+	filter := bson. M{"symbol": "KLV"}
 */
-func (c CryptoVoteDAO) DeleteManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) (*mongo.DeleteResult, error) {
-	//criar um contexto com deadline de 10 segundos
+func (c CryptoVoteDAO) DeleteMany(filter bson.M) (int64, error) {
+	var deletedCount int64 = int64(0)
+
+	// uses function from dao package to start the mongo client
+	mongodbClient, err := GetMongoClientInstance(c.dbService)
+	if err != nil {
+		z := "[cryptovote.mongodb] Problems using GetMongoClientInstance: " + err.Error()
+		err = errors.New(z)
+		return deletedCount, err
+	}
+
+	// create a context with 10-second deadline
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	cryptoVoteCollection := mongodbClient.Database(db_name).Collection(collection_name)
 
 	deleteResult, err := cryptoVoteCollection.DeleteMany(mongoContext, filter)
-	return deleteResult, err
+	if err != nil {
+		z := "[cryptovote.mongodb] Problems using DeleteMany: " + err.Error()
+		err = errors.New(z)
+		return deletedCount, err
+	}
+	deletedCount = deleteResult.DeletedCount
+	return deletedCount, err
 }
 
-//Função para buscar
 /*
-	Função para recuperar vários registros de model.CryptoVote
-	usa na entrada filter := bson.M{"symbol": "KLV"}
+	Function to find and retrieve one record using a filter.
+	filter := bson. M{"symbol": "KLV"}
 */
-func (c CryptoVoteDAO) FindOneCryptoVote(mongodbClient *mongo.Client, filter bson.M) (model.CryptoVote, error) {
+func (c CryptoVoteDAO) FindOne(filter bson.M) (model.CryptoVote, error) {
 	var oneCryptoVote model.CryptoVote
+	var err error
 
-	//criar um contexto com deadline de 10 segundos
+	// uses function from dao package to start the mongo client
+	mongodbClient, err := GetMongoClientInstance(c.dbService)
+	if err != nil {
+		z := "[cryptovote.mongodb] Problems using GetMongoClientInstance: " + err.Error()
+		err = errors.New(z)
+		return oneCryptoVote, err
+	}
+
+	// create a context with 10-second deadline
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	cryptoVoteCollection := mongodbClient.Database(db_name).Collection(collection_name)
 
 	singleResult := cryptoVoteCollection.FindOne(mongoContext, filter)
-	err := singleResult.Decode(&oneCryptoVote)
+	err = singleResult.Decode(&oneCryptoVote)
 	return oneCryptoVote, err
 }
 
 /*
-	Função para recuperar vários registros de model.CryptoVote
-	usa na entrada filter := bson.M{"symbol": "KLV"}
+	Function to find and retrieve many record using a filter.
+	filter := bson. M{"symbol": "KLV"}
 */
-func (c CryptoVoteDAO) FindManyCryptoVote(mongodbClient *mongo.Client, filter bson.M) ([]model.CryptoVote, error) {
+func (c CryptoVoteDAO) FindMany(filter bson.M) ([]model.CryptoVote, error) {
 	var oneCryptoVote model.CryptoVote
 	var manyCryptoVotes []model.CryptoVote
 
-	//criar um contexto com deadline de 10 segundos
+	// uses function from dao package to start the mongo client
+	mongodbClient, err := GetMongoClientInstance(c.dbService)
+	if err != nil {
+		z := "[cryptovote.mongodb] Problems using GetMongoClientInstance: " + err.Error()
+		err = errors.New(z)
+		return manyCryptoVotes, err
+	}
+
+	// create a context with 10-second deadline
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -89,12 +165,11 @@ func (c CryptoVoteDAO) FindManyCryptoVote(mongodbClient *mongo.Client, filter bs
 
 	cursor, err := cryptoVoteCollection.Find(mongoContext, filter)
 
-	// chamada ao banco cryptoVoteCollection.Find(mongoContext, filter) tem erro
+	// previous call cryptoVoteCollection.Find(mongoContext, filter) has database errors
 	if err != nil {
 		defer cancel()
 
 	} else {
-		// se a chamada ao banco estiver ok
 		manyCryptoVotes = nil
 		for cursor.Next(mongoContext) {
 			err = cursor.Decode(&oneCryptoVote)
@@ -105,13 +180,22 @@ func (c CryptoVoteDAO) FindManyCryptoVote(mongodbClient *mongo.Client, filter bs
 }
 
 /*
-	Função para recuperar vários registros de model.CryptoVote
+	Function to find and retrieve many record using filter and other options.
 */
-func (c CryptoVoteDAO) FindManyCryptoVoteLimitedSortedByField(mongodbClient *mongo.Client, filter bson.M, limit int64, sortFieldName string, orderType int) ([]model.CryptoVote, error) {
+func (c CryptoVoteDAO) FindManyLimitedSortedByField(filter bson.M, limit int64, sortFieldName string, orderType int) ([]model.CryptoVote, error) {
 	var oneCryptoVote model.CryptoVote
 	var manyCryptoVotes []model.CryptoVote
+	var err error
 
-	//criar um contexto com deadline de 10 segundos
+	// uses function from dao package to start the mongo client
+	mongodbClient, err := GetMongoClientInstance(c.dbService)
+	if err != nil {
+		z := "[cryptovote.mongodb] Problems using GetMongoClientInstance: " + err.Error()
+		err = errors.New(z)
+		return manyCryptoVotes, err
+	}
+
+	// create a context with 10-second deadline
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -124,12 +208,11 @@ func (c CryptoVoteDAO) FindManyCryptoVoteLimitedSortedByField(mongodbClient *mon
 
 	cursor, err := cryptoVoteCollection.Find(mongoContext, filter, opt)
 
-	// chamada ao banco cryptoVoteCollection.Find(mongoContext, filter) tem erro
+	// previous call cryptoVoteCollection.Find(mongoContext, filter) has database errors
 	if err != nil {
 		defer cancel()
 
 	} else {
-		// se a chamada ao banco estiver ok
 		manyCryptoVotes = nil
 		for cursor.Next(mongoContext) {
 			err = cursor.Decode(&oneCryptoVote)
@@ -139,24 +222,30 @@ func (c CryptoVoteDAO) FindManyCryptoVoteLimitedSortedByField(mongodbClient *mon
 	return manyCryptoVotes, err
 }
 
-//Função para atualizar
 /*
-	Função para deletar um registro
-	usa na entrada filter := bson.M{"symbol": "KLV"}
-
-	usa na entrada newData := bson.M{"name": "New Data"}
+	Function to update one record using filter and newData.
+	filter := bson.M{"symbol": "KLV"}
+	newData := bson.M{"name": "New Data"}
 */
-func (c CryptoVoteDAO) UpdateOneCryptoVote(mongodbClient *mongo.Client, filter bson.M, newData bson.M) (model.CryptoVote, error) {
+func (c CryptoVoteDAO) UpdateOne(filter bson.M, newData bson.M) (model.CryptoVote, error) {
 	var oneCryptoVote model.CryptoVote
+	var err error
 
-	//criar um contexto com deadline de 10 segundos
+	// uses function from dao package to start the mongo client
+	mongodbClient, err := GetMongoClientInstance(c.dbService)
+	if err != nil {
+		z := "[cryptovote.mongodb] Problems using GetMongoClientInstance: " + err.Error()
+		err = errors.New(z)
+		return oneCryptoVote, err
+	}
+
+	// create a context with 10-second deadline
 	mongoContext, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	cryptoVoteCollection := mongodbClient.Database(db_name).Collection(collection_name)
 
-	//se o documento não exisitr não faz nada
-	//se alterar para true cria um novo documento caso não seja localizado
+	// only updates if the document exists, if upsert := true, creates a new document if it not located
 	upsert := false
 	after := options.After
 	opt := options.FindOneAndUpdateOptions{
@@ -165,6 +254,6 @@ func (c CryptoVoteDAO) UpdateOneCryptoVote(mongodbClient *mongo.Client, filter b
 	}
 
 	updateResult := cryptoVoteCollection.FindOneAndUpdate(mongoContext, filter, newData, &opt)
-	err := updateResult.Decode(&oneCryptoVote)
+	err = updateResult.Decode(&oneCryptoVote)
 	return oneCryptoVote, err
 }
