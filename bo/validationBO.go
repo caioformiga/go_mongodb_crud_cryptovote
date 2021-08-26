@@ -113,7 +113,7 @@ func (c CryptoVoteBO) validateUnique(key string, value string) (bool, error) {
 	name : unique
 	symbol : unique
 */
-func (c CryptoVoteBO) ValidateCryptoVoteUniqueData(name string, symbol string) (bool, error) {
+func (bo CryptoVoteBO) ValidateCryptoVoteUniqueData(name string, symbol string) (bool, error) {
 	var validate bool = false
 	var key string
 	var value string
@@ -123,7 +123,7 @@ func (c CryptoVoteBO) ValidateCryptoVoteUniqueData(name string, symbol string) (
 	if len(name) > 0 {
 		key = "name"
 		value = name
-		validate, err = c.validateUnique(key, value)
+		validate, err = bo.validateUnique(key, value)
 		if !validate {
 			return validate, err
 		}
@@ -133,7 +133,7 @@ func (c CryptoVoteBO) ValidateCryptoVoteUniqueData(name string, symbol string) (
 	if len(symbol) > 0 {
 		key = "symbol"
 		value = symbol
-		validate, err = c.validateUnique(key, value)
+		validate, err = bo.validateUnique(key, value)
 		if !validate {
 			return validate, err
 		}
