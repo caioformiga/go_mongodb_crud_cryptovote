@@ -1,4 +1,4 @@
-package bo
+package utils
 
 import (
 	"encoding/json"
@@ -9,15 +9,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (bo CryptoVoteBO) MarshalCryptoVoteToBsonFilter(cryptoVote model.CryptoVote) (bson.M, error) {
-	return bo.marshalInterfaceToBsonFilter(cryptoVote)
+func MarshalCryptoVoteToBsonFilter(cryptoVote model.CryptoVote) (bson.M, error) {
+	return marshalInterfaceToBsonFilter(cryptoVote)
 }
 
-func (bo CryptoVoteBO) MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote model.FilterCryptoVote) (bson.M, error) {
-	return bo.marshalInterfaceToBsonFilter(filterCryptoVote)
+func MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote model.FilterCryptoVote) (bson.M, error) {
+	return marshalInterfaceToBsonFilter(filterCryptoVote)
 }
 
-func (bo CryptoVoteBO) marshalInterfaceToBsonFilter(i interface{}) (bson.M, error) {
+func marshalInterfaceToBsonFilter(i interface{}) (bson.M, error) {
 	var err error
 	var out bson.M
 

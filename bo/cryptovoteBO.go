@@ -113,7 +113,7 @@ func (bo CryptoVoteBO) CreateCryptoVote(cryptoVote model.CryptoVote) (model.Cryp
 func (bo CryptoVoteBO) RetrieveAllCryptoVoteByFilter(filterCryptoVote model.FilterCryptoVote) ([]model.CryptoVote, error) {
 	var listCryptoVote []model.CryptoVote
 
-	filter, err := bo.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
+	filter, err := utils.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
 	if err != nil {
 		return listCryptoVote, err
 	}
@@ -157,7 +157,7 @@ func (bo CryptoVoteBO) retrieveOneCryptoVote(name string, symbol string) (model.
 	}
 
 	if validate {
-		filter, err := bo.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
+		filter, err := utils.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
 		if err != nil {
 			return retrievedCryptoVote, err
 		}
@@ -214,7 +214,7 @@ func (bo CryptoVoteBO) UpdateOneCryptoVoteByFilter(filterCryptoVote model.Filter
 		if !retrievedCryptoVote.Id.IsZero() {
 			idFilter := bson.M{"_id": retrievedCryptoVote.Id}
 
-			bsonCryptoNewData, err := bo.MarshalCryptoVoteToBsonFilter(cryptoNewData)
+			bsonCryptoNewData, err := utils.MarshalCryptoVoteToBsonFilter(cryptoNewData)
 			if err != nil {
 				return retrievedCryptoVote, err
 			}
@@ -254,7 +254,7 @@ func (bo CryptoVoteBO) DeleteAllCryptoVoteByFilter(filterCryptoVote model.Filter
 	// continues if at least one of the filters is not empty
 	if validateCryptoVoteArgumentNotEmpty(filterCryptoVote.Name) || validateCryptoVoteArgumentNotEmpty(filterCryptoVote.Symbol) {
 
-		filter, err := bo.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
+		filter, err := utils.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
 		if err != nil {
 			return deletedCount, err
 		}
@@ -401,7 +401,7 @@ func (bo CryptoVoteBO) SumaryAllCryptoVote(pageSize int64) ([]model.SumaryCrypto
 		Symbol: "",
 	}
 
-	filter, err := bo.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
+	filter, err := utils.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
 	if err != nil {
 		return sumaryCryptoVotes, err
 	}
