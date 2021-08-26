@@ -7,10 +7,10 @@ package utils
 	corresponding positive value, see details at:
 	[https://yourbasic.org/golang/absolute-value-int-float/]
 */
-func Abs(x int) int {
+func Abs(x int64) int64 {
 	a := int64(x)
 	if a < 0 {
-		return int(-a)
+		return (-a)
 	}
-	return int(a)
+	return (a)
 }
