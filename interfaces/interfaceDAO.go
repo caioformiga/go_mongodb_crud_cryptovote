@@ -13,7 +13,7 @@ import (
 	to implement all the methods of the given interface.
 
 	InterfaceCryptoVoteDAO has the signature of 8 methods. The class which implements this interface will
-	define the bank-related actions, using one of its 6 CRUD a model data methods. Besides this, it creates
+	define the database-related actions, using one of its 6 CRUD a model data methods. Besides this, it creates
 	2 subscription methods so that you can define other database services.
 */
 type InterfaceCryptoVoteDAO interface {

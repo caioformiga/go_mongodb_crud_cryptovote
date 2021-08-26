@@ -12,16 +12,16 @@ import (
 
 	InterfaceCryptoVoteBO has the signature of 11 methods. The class which implements this interface
 	will define the business rules (BUSNESS OBJECT) for model-related actions, such as: validation, steps
-	before bank-related actions. It works to prepare data before Create One, Retrieve One or Many, Update
+	before database-related actions. It works to prepare data before Create One, Retrieve One or Many, Update
 	One, Delete One or Many, Add Vote (Down, means deslike or Up, as like) and so on...
 
-	In this implementation there is no access to the bank. All bank-related actions are managed by a DAO
+	In this implementation there is no access to the database. All database-related actions are managed by a DAO
 	object defined at constructor method NewCryptoVoteBO(), more details for this topic see SetCryptoVoteDAO.
 */
 type InterfaceCryptoVoteBO interface {
 	/*
 		Only used in test environments, to set a diferent DAO that might be Mock of the CryptoVoteDAO Interface,
-		to simulate interaction with the bank. At production en environments, is used the constructor method
+		to simulate interaction with the database. At production en environments, is used the constructor method
 		NewCryptoVoteBO()
 	*/
 	SetCryptoVoteDAO(dao InterfaceCryptoVoteDAO)
