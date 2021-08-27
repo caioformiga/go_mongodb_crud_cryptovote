@@ -31,10 +31,10 @@ func validateCryptoVoteArgumentLenght(arg string, lenght int) bool {
 	return validate
 }
 
-func validateCryptoVoteArgumentNotNegative(arg int) bool {
+func validateCryptoVoteArgumentNotNegative(arg int64) bool {
 	validate := false
 
-	if arg >= 0 {
+	if arg >= int64(0) {
 		validate = true
 	} else {
 		validate = false
