@@ -57,12 +57,7 @@ func (bo CryptoVoteBO) SetCryptoVoteDAO(iDAO interfaces.InterfaceCryptoVoteDAO) 
 }
 
 /*
-	CreateCryptoVote validates the entries before creating a model. CryptoVote on the bench cryptoVote.Name.
-
-	cryptoVote.Name if "KLevER" save "Klever"
-	cryptoVote.Symbol if klv save "KLV"
-
-	return a model.CryptoVote stored at database
+	CreateCryptoVote validates data input before save. Return a model.CryptoVote stored at database.
 */
 func (bo CryptoVoteBO) CreateCryptoVote(cryptoVote model.CryptoVote) (model.CryptoVote, error) {
 	var savedCryptoVote model.CryptoVote
@@ -91,7 +86,9 @@ func (bo CryptoVoteBO) CreateCryptoVote(cryptoVote model.CryptoVote) (model.Cryp
 }
 
 /*
-	RetrieveAllCryptoVoteByFilter returns a list of model.CryptoVote stored at database
+	RetrieveAllCryptoVoteByFilter using filter to find many itens. Returns a list of
+	model.CryptoVote stored at database or nil, if filter mismatch.
+
 	// all data from model
 	var filterCryptoVote = model.FilterCryptoVote{
 		Name: "",
@@ -129,8 +126,9 @@ func (bo CryptoVoteBO) RetrieveAllCryptoVoteByFilter(filterCryptoVote model.Filt
 }
 
 /*
-	RetrieveOneCryptoVoteById returns a model.CryptoVote stored at database. At least one arg (name or symbol)
-	must be different from null.
+	RetrieveOneCryptoVote creates a filter using args (name or symbol) to find one item.
+	At least on filter shouldn't be empty. Returns a model.CryptoVote stored at database or nil
+	if filter mismatch.
 */
 func (bo CryptoVoteBO) RetrieveOneCryptoVote(name string, symbol string) (model.CryptoVote, error) {
 	return bo.retrieveOneCryptoVote(name, symbol)
@@ -151,7 +149,7 @@ func (bo CryptoVoteBO) retrieveOneCryptoVote(name string, symbol string) (model.
 	if validateCryptoVoteArgumentNotEmpty(filterCryptoVote.Name) || validateCryptoVoteArgumentNotEmpty(filterCryptoVote.Symbol) {
 		validate = true
 	} else {
-		z := "[cryptovote.validation] one of the filters should be not empty"
+		z := "[cryptovote.validation] at least on filter shouldn't be empty"
 		err = errors.New(z)
 		return retrievedCryptoVote, err
 	}
@@ -174,7 +172,8 @@ func (bo CryptoVoteBO) retrieveOneCryptoVote(name string, symbol string) (model.
 }
 
 /*
-	UpdateOneCryptoVoteByFilter faz uma atualização de todas as model.CryptoVote que satisfazem o filtro
+	UpdateOneCryptoVoteByFilter uses a filter to find one item and set newData to it before update database.
+	Return a model.CryptoVote updated or nil, if filter mismatch.
 
 	filterCryptoVote = model.FilterCryptoVote{
 		Name: "Bitcoin",
@@ -187,9 +186,6 @@ func (bo CryptoVoteBO) retrieveOneCryptoVote(name string, symbol string) (model.
 		Qtd_Upvote: 0,
 		Qtd_Downvote: 0,
 	}
-
-	return a model.CryptoVote stored at database
-	uma coleção de model.CryptoVote armazenada no banco, testes realizados como o mongoDB
 */
 func (bo CryptoVoteBO) UpdateOneCryptoVoteByFilter(filterCryptoVote model.FilterCryptoVote, cryptoNewData model.CryptoVote) (model.CryptoVote, error) {
 	var retrievedCryptoVote model.CryptoVote
@@ -210,7 +206,7 @@ func (bo CryptoVoteBO) UpdateOneCryptoVoteByFilter(filterCryptoVote model.Filter
 			return retrievedCryptoVote, err
 		}
 
-		// continues if id is not zero, because the new data are validated
+		// continues if ID isn't zero, because newData are validated
 		if !retrievedCryptoVote.Id.IsZero() {
 			idFilter := bson.M{"_id": retrievedCryptoVote.Id}
 
@@ -223,7 +219,7 @@ func (bo CryptoVoteBO) UpdateOneCryptoVoteByFilter(filterCryptoVote model.Filter
 				"$set": bsonCryptoNewData,
 			}
 
-			// atualização
+			// uses a filter to find one model.CryptoVote and set newData within
 			retrievedCryptoVote, err = bo.ImplDAO.UpdateOne(idFilter, newData)
 			if err != nil {
 				z := "[cryptovote.mongodb] Problems using bo.cryptoVoteDAO.UpdateOne: " + err.Error()
@@ -236,7 +232,8 @@ func (bo CryptoVoteBO) UpdateOneCryptoVoteByFilter(filterCryptoVote model.Filter
 }
 
 /*
-	DeleteAllCryptoVoteByFilter return number of itens deleted.
+	DeleteAllCryptoVoteByFilter uses filter to find many itens and delete all of them.
+	Return number of itens deleted. Zero indicates filter mismatch.
 
 	filterCryptoVote = model.FilterCryptoVote{
 		Name: "Bitcoin",
@@ -244,7 +241,7 @@ func (bo CryptoVoteBO) UpdateOneCryptoVoteByFilter(filterCryptoVote model.Filter
 	}
 */
 func (bo CryptoVoteBO) DeleteAllCryptoVoteByFilter(filterCryptoVote model.FilterCryptoVote) (int64, error) {
-	var deletedCount int64 = int64(0)
+	var deletedCount int64 = 0
 	var err error
 
 	// creates a filter using args
@@ -267,20 +264,17 @@ func (bo CryptoVoteBO) DeleteAllCryptoVoteByFilter(filterCryptoVote model.Filter
 			return deletedCount, err
 		}
 	} else {
-		z := "[cryptovote.validation] one of the filters should be not empty: " + err.Error()
+		z := "[cryptovote.validation] at least on filter shouldn't be empty: " + err.Error()
 		err = errors.New(z)
 		return deletedCount, err
 	}
-
 	return deletedCount, err
 }
 
 func (bo CryptoVoteBO) DeleteAllCryptoVote() (int64, error) {
-	var deletedCount int64 = int64(0)
-	var err error
-
-	// translate from json para bson
 	var filter = bson.M{}
+	var deletedCount int64 = 0
+	var err error
 
 	// uses function from package dao
 	deletedCount, err = bo.ImplDAO.DeleteMany(filter)
@@ -294,8 +288,7 @@ func (bo CryptoVoteBO) DeleteAllCryptoVote() (int64, error) {
 
 /*
 	AddUpVote perform an addition of a Upvote attribute from model.CryptoVote, using a filter.
-
-	return a model.CryptoVote stored at database or nil if no data
+	Return a model.CryptoVote stored at database or nil, if filter mismatch.
 */
 func (bo CryptoVoteBO) AddUpVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, error) {
 	var retrievedCryptoVote model.CryptoVote
@@ -321,8 +314,7 @@ func (bo CryptoVoteBO) AddUpVote(filterCryptoVote model.FilterCryptoVote) (model
 
 /*
 	AddDownVote perform an addition of a DownVote attribute from model.CryptoVote, using a filter.
-
-	return a model.CryptoVote stored at database or nil if no data
+	Return a model.CryptoVote stored at database or nil, if filter mismatch.
 */
 func (bo CryptoVoteBO) AddDownVote(filterCryptoVote model.FilterCryptoVote) (model.CryptoVote, error) {
 	var retrievedCryptoVote model.CryptoVote
@@ -351,12 +343,11 @@ func (bo CryptoVoteBO) AddDownVote(filterCryptoVote model.FilterCryptoVote) (mod
 	return retrievedCryptoVote, err
 }
 
-func (bo CryptoVoteBO) updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd int, newSum int, newSumAbsolute int) (model.CryptoVote, error) {
+func (bo CryptoVoteBO) updateVote(retrievedCryptoVote model.CryptoVote, typeVote string, newQtd int64, newSum int64, newSumAbsolute int64) (model.CryptoVote, error) {
 	var err error
 
 	// creates filter
 	filter := bson.M{"_id": retrievedCryptoVote.Id}
-
 	newData := bson.M{
 		"$set": bson.M{
 			typeVote:       newQtd,
@@ -371,31 +362,27 @@ func (bo CryptoVoteBO) updateVote(retrievedCryptoVote model.CryptoVote, typeVote
 		err = errors.New(z)
 		return retrievedCryptoVote, err
 	}
-
 	return retrievedCryptoVote, err
 }
 
 /*
 	SumaryAllCryptoVote perform search sorted by Sum, using pageSize to limit slice lenght.
-	Sum is abs value of (Upvote - DownVote).
-
-	returns a slice of []model.SumaryVote stored at database or nil if no data
+	Returns a slice of []model.SumaryVote stored at database or nil, if filter mismatch.
 */
 func (bo CryptoVoteBO) SumaryAllCryptoVote(pageSize int64) ([]model.SumaryCryptoVote, error) {
 	var sumaryCryptoVotes []model.SumaryCryptoVote
 	var retrievedCryptoVotes []model.CryptoVote
 	var filterCryptoVote model.FilterCryptoVote
+	const ZERO int64 = 0
+	var defaultPageSize int64 = 10
 	var err error
 
-	var flag_zero = 0
-	var flag_default_page_size = 10
-
-	// uses default value = 10
-	if pageSize == int64(flag_zero) {
-		pageSize = int64(flag_default_page_size)
+	if pageSize == ZERO {
+		// uses default value = 10
+		pageSize = defaultPageSize
 	}
 
-	// if nil, usse empty filter
+	// if nil, use empty filter
 	filterCryptoVote = model.FilterCryptoVote{
 		Name:   "",
 		Symbol: "",
@@ -440,7 +427,6 @@ func (bo CryptoVoteBO) SumaryAllCryptoVote(pageSize int64) ([]model.SumaryCrypto
 			}
 		}
 		sumary.SumType = sumType
-
 		sumaryCryptoVotes = append(sumaryCryptoVotes, sumary)
 	}
 	return sumaryCryptoVotes, err

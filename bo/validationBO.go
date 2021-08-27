@@ -88,12 +88,12 @@ func ValidateCryptoVoteArguments(crypto model.CryptoVote) (bool, error) {
 	return validate, nil
 }
 
-func (c CryptoVoteBO) validateUnique(key string, value string) (bool, error) {
+func (bo CryptoVoteBO) validateUnique(key string, value string) (bool, error) {
 	var retrivedCryptoVotes []model.CryptoVote
 	var err error
 
 	// use function from dao package
-	retrivedCryptoVotes, err = c.ImplDAO.FindMany(bson.M{key: value})
+	retrivedCryptoVotes, err = bo.ImplDAO.FindMany(bson.M{key: value})
 	if err != nil {
 		z := "Problems using FindManyCryptoVote: " + err.Error()
 		log.Print(z)
@@ -144,7 +144,7 @@ func (bo CryptoVoteBO) ValidateCryptoVoteUniqueData(name string, symbol string) 
 /*
 	External function to handle all validation process
 */
-func (c CryptoVoteBO) ValidateCryptoVote(crypto model.CryptoVote) (bool, error) {
+func (bo CryptoVoteBO) ValidateCryptoVote(crypto model.CryptoVote) (bool, error) {
 	var validate = false
 	var err error
 
@@ -157,7 +157,7 @@ func (c CryptoVoteBO) ValidateCryptoVote(crypto model.CryptoVote) (bool, error) 
 	}
 
 	// uses function from bo package
-	validate, err = c.ValidateCryptoVoteUniqueData(crypto.Name, crypto.Symbol)
+	validate, err = bo.ValidateCryptoVoteUniqueData(crypto.Name, crypto.Symbol)
 	if err != nil {
 		return validate, err
 	} else {
