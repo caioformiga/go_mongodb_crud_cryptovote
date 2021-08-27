@@ -43,6 +43,26 @@ func validateCryptoVoteArgumentNotNegative(arg int64) bool {
 	return validate
 }
 
+func (bo CryptoVoteBO) validateUnique(key string, value string) (bool, error) {
+	var retrivedCryptoVotes []model.CryptoVote
+	var err error
+
+	// use function from dao package
+	retrivedCryptoVotes, err = bo.ImplDAO.FindMany(bson.M{key: value})
+	if err != nil {
+		z := "Problems using FindManyCryptoVote: " + err.Error()
+		log.Print(z)
+	}
+
+	var validate bool = true
+
+	if len(retrivedCryptoVotes) > 0 {
+		validate = false
+		return validate, errors.New("[cryptovote.validationBO] field(" + key + ") already exists, choose anoter value different from " + value)
+	}
+	return validate, err
+}
+
 /*
 	Checks each field using below criteria:
 	Name cannot be empty
@@ -86,26 +106,6 @@ func ValidateCryptoVoteArguments(crypto model.CryptoVote) (bool, error) {
 		return validate, errors.New("[cryptovote.validationBO] qtd_downvote can't have less then zero")
 	}
 	return validate, nil
-}
-
-func (bo CryptoVoteBO) validateUnique(key string, value string) (bool, error) {
-	var retrivedCryptoVotes []model.CryptoVote
-	var err error
-
-	// use function from dao package
-	retrivedCryptoVotes, err = bo.ImplDAO.FindMany(bson.M{key: value})
-	if err != nil {
-		z := "Problems using FindManyCryptoVote: " + err.Error()
-		log.Print(z)
-	}
-
-	var validate bool = true
-
-	if len(retrivedCryptoVotes) > 0 {
-		validate = false
-		return validate, errors.New("[cryptovote.validationBO] field(" + key + ") already exists, choose anoter value different from " + value)
-	}
-	return validate, err
 }
 
 /*
