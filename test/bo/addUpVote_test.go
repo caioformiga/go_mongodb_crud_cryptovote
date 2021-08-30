@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAddUpVoteValidFilterByNameAndSymbol(t *testing.T) {
+func TestAddDownVoteValidFilterByNameAndSymbol(t *testing.T) {
 	var boInstance bo.CryptoVoteBO
 	var mockDAO *mock.MockInterfaceCryptoVoteDAO
 	var in = utils.LoadOneNewCryptoVoteDataFromArgs("Formiga", "FORM")
@@ -38,7 +38,7 @@ func TestAddUpVoteValidFilterByNameAndSymbol(t *testing.T) {
 		Symbol: "FORM",
 	}
 
-	retrievedCryptoVote, err = boInstance.AddUpVote(filterCryptoVote)
+	retrievedCryptoVote, err = boInstance.AddDownVote(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 	assert.Equal(t, retrievedCryptoVote.Name, in.Name, "they should be equal")
 	assert.Equal(t, retrievedCryptoVote.Symbol, in.Symbol, "they should be equal")
@@ -50,7 +50,7 @@ func TestAddUpVoteValidFilterByNameAndSymbol(t *testing.T) {
 	assert.Equal(t, retrievedCryptoVote.SumAbsolute, newSumAbsolute, "they should be equal")
 }
 
-func TestAddUpVoteValidFilterByName(t *testing.T) {
+func TestAddDownVoteValidFilterByName(t *testing.T) {
 	var boInstance bo.CryptoVoteBO
 	var mockDAO *mock.MockInterfaceCryptoVoteDAO
 	var in = utils.LoadOneNewCryptoVoteDataFromArgs("Formiga", "FORM")
@@ -77,7 +77,7 @@ func TestAddUpVoteValidFilterByName(t *testing.T) {
 		Symbol: "",
 	}
 
-	retrievedCryptoVote, err = boInstance.AddUpVote(filterCryptoVote)
+	retrievedCryptoVote, err = boInstance.AddDownVote(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 	assert.Equal(t, retrievedCryptoVote.Name, in.Name, "they should be equal")
 	assert.Equal(t, retrievedCryptoVote.Symbol, in.Symbol, "they should be equal")
@@ -89,7 +89,7 @@ func TestAddUpVoteValidFilterByName(t *testing.T) {
 	assert.Equal(t, retrievedCryptoVote.SumAbsolute, newSumAbsolute, "they should be equal")
 }
 
-func TestAddUpVoteValidFilterBySymbol(t *testing.T) {
+func TestAddDownVoteValidFilterBySymbol(t *testing.T) {
 	var boInstance bo.CryptoVoteBO
 	var mockDAO *mock.MockInterfaceCryptoVoteDAO
 	var in = utils.LoadOneNewCryptoVoteDataFromArgs("Formiga", "FORM")
@@ -116,7 +116,7 @@ func TestAddUpVoteValidFilterBySymbol(t *testing.T) {
 		Symbol: "FORM",
 	}
 
-	retrievedCryptoVote, err = boInstance.AddUpVote(filterCryptoVote)
+	retrievedCryptoVote, err = boInstance.AddDownVote(filterCryptoVote)
 	assert.Nil(t, err, "err should be nil")
 	assert.Equal(t, retrievedCryptoVote.Name, in.Name, "they should be equal")
 	assert.Equal(t, retrievedCryptoVote.Symbol, in.Symbol, "they should be equal")
@@ -128,7 +128,7 @@ func TestAddUpVoteValidFilterBySymbol(t *testing.T) {
 	assert.Equal(t, retrievedCryptoVote.SumAbsolute, newSumAbsolute, "they should be equal")
 }
 
-func TestAddUpVoteInvalidFilter(t *testing.T) {
+func TestAddDownVoteInvalidFilter(t *testing.T) {
 	var boInstance bo.CryptoVoteBO
 	var mockDAO *mock.MockInterfaceCryptoVoteDAO
 	var retrievedCryptoVote model.CryptoVote
@@ -142,7 +142,7 @@ func TestAddUpVoteInvalidFilter(t *testing.T) {
 		)
 	}
 
-	retrievedCryptoVote, err = boInstance.AddUpVote(model.FilterCryptoVote{})
+	retrievedCryptoVote, err = boInstance.AddDownVote(model.FilterCryptoVote{})
 	assert.NotNil(t, err, "err should not be nil")
 	assert.True(t, retrievedCryptoVote.Id.IsZero(), " should be true")
 }
