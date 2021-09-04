@@ -10,6 +10,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func LoadOneNewEmptyFilterCryptoVote() model.FilterCryptoVote {
+
+	var filterCryptoVote model.FilterCryptoVote = model.FilterCryptoVote{
+		Name:   "",
+		Symbol: "",
+	}
+
+	return filterCryptoVote
+}
+
 func LoadOneNewCryptoVoteDataFromArgs(name string, symbol string) model.CryptoVote {
 
 	var cryptoVote model.CryptoVote = model.CryptoVote{
@@ -65,41 +75,47 @@ func LoadOneCryptoVoteDataFromJson(jsonData []byte) (model.CryptoVote, error) {
 var JsonOutData = []byte(`[{
     "name": "Bitcoin",
     "symbol": "BTC",
-	"qtd_upvote": 0,
-	"qtd_downvote": 0,
-	"sum": 0
+	"qtd_upvote": 1000,
+	"qtd_downvote": 1,
+	"sum": 999,
+	"sum_absolute": 999
 }, {
 	"name": "Ethereum",
     "symbol": "ETH",
-	"qtd_upvote": 0,
-	"qtd_downvote": 0,
-	"sum": 0
+	"qtd_upvote": 5,
+	"qtd_downvote": 15,
+	"sum": -10,
+	"sum_absolute": 10
 }, {	
 	"name": "Klever",
     "symbol": "KLV",
-	"qtd_upvote": 0,
-	"qtd_downvote": 0,
-	"sum": 0
+	"qtd_upvote": 30000,
+	"qtd_downvote": 1,
+	"sum": 29999, 
+	"sum_absolute": 29999
 }]`)
 
 var JsonInData = []byte(`[{
 	"name": "Bitcoin",
 	"symbol": "btc",
-	"qtd_upvote": 0,
-	"qtd_downvote": 0,
-	"sum": 0
+	"qtd_upvote": 1000,
+	"qtd_downvote": 1,
+	"sum": 999,
+	"sum_absolute": 999
 }, {
 	"name": "EthEreum",
 	"symbol": "EtH",
-	"qtd_upvote": 0,
-	"qtd_downvote": 0,
-	"sum": 0
+	"qtd_upvote": 5,
+	"qtd_downvote": 15,
+	"sum": -10,
+	"sum_absolute": 10
 }, {	
 	"name": "klever",
 	"symbol": "KLV",
-	"qtd_upvote": 0,
-	"qtd_downvote": 0,
-	"sum": 0
+	"qtd_upvote": 30000,
+	"qtd_downvote": 1,
+	"sum": 29999,
+	"sum_absolute": 29999
 }]`)
 
 var JsonBadData = []byte(`[{
