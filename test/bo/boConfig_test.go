@@ -9,10 +9,10 @@ import (
 )
 
 /*
-	configBOmockedDAO is a helper function to create a boInstance within a mockDAO to simulate
+	ConfigBOmockedDAO is a helper function to create a boInstance within a mockDAO to simulate
 	database-related actions.
 */
-func configBOmockedDAO(t *testing.T) (bo.CryptoVoteBO, *mock.MockInterfaceCryptoVoteDAO) {
+func ConfigBOmockedDAO(t *testing.T) (bo.CryptoVoteBO, *mock.MockInterfaceCryptoVoteDAO) {
 	// Create the controller
 	var mockCtrl = gomock.NewController(t)
 	defer mockCtrl.Finish()

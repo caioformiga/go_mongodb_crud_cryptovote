@@ -19,7 +19,7 @@ func TestAddUpVoteValidFilterByNameAndSymbol(t *testing.T) {
 	var retrievedCryptoVote model.CryptoVote
 	var err error
 
-	boInstance, mockDAO = configBOmockedDAO(t)
+	boInstance, mockDAO = ConfigBOmockedDAO(t)
 	if mockDAO != nil {
 
 		out.Qtd_Upvote = out.Qtd_Upvote + 1
@@ -58,7 +58,7 @@ func TestAddUpVoteValidFilterByName(t *testing.T) {
 	var retrievedCryptoVote model.CryptoVote
 	var err error
 
-	boInstance, mockDAO = configBOmockedDAO(t)
+	boInstance, mockDAO = ConfigBOmockedDAO(t)
 	if mockDAO != nil {
 
 		out.Qtd_Upvote = out.Qtd_Upvote + 1
@@ -97,7 +97,7 @@ func TestAddUpVoteValidFilterBySymbol(t *testing.T) {
 	var retrievedCryptoVote model.CryptoVote
 	var err error
 
-	boInstance, mockDAO = configBOmockedDAO(t)
+	boInstance, mockDAO = ConfigBOmockedDAO(t)
 	if mockDAO != nil {
 
 		out.Qtd_Upvote = out.Qtd_Upvote + 1
@@ -134,7 +134,7 @@ func TestAddUpVoteInvalidFilter(t *testing.T) {
 	var retrievedCryptoVote model.CryptoVote
 	var err error
 
-	boInstance, mockDAO = configBOmockedDAO(t)
+	boInstance, mockDAO = ConfigBOmockedDAO(t)
 	if mockDAO != nil {
 		// prepare mock simulation at below order
 		gomock.InOrder(

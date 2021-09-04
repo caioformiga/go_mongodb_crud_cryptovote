@@ -66,7 +66,7 @@ func TestValidateCryptoVoteValidFullData(t *testing.T) {
 	var mockDAO *mock.MockInterfaceCryptoVoteDAO
 	var in model.CryptoVote = utils.LoadOneNewCryptoVoteDataFromArgs("FormiCOIN", "FORM")
 
-	boInstance, mockDAO = configBOmockedDAO(t)
+	boInstance, mockDAO = ConfigBOmockedDAO(t)
 	if mockDAO != nil {
 		// prepare mock simulation at below order
 		gomock.InOrder(
@@ -85,7 +85,7 @@ func TestValidateCryptoVoteInvalidNotUniqueData(t *testing.T) {
 	var mockDAO *mock.MockInterfaceCryptoVoteDAO
 	var in model.CryptoVote = utils.LoadOneNewCryptoVoteDataFromArgs("FormiCOIN", "FORM")
 
-	boInstance, mockDAO = configBOmockedDAO(t)
+	boInstance, mockDAO = ConfigBOmockedDAO(t)
 	if mockDAO != nil {
 		// add CryptoVote name = "FormiCOIN" symbol = "FORM"
 		list := []model.CryptoVote{in}
