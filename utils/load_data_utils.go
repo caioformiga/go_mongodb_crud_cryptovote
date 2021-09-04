@@ -72,6 +72,29 @@ func LoadOneCryptoVoteDataFromJson(jsonData []byte) (model.CryptoVote, error) {
 	return *ptr, err
 }
 
+var JsonOutDataSorted = []byte(`[{
+    "name": "Klever",
+    "symbol": "KLV",
+	"qtd_upvote": 30000,
+	"qtd_downvote": 1,
+	"sum": 29999, 
+	"sum_absolute": 29999
+}, {	
+	"name": "Bitcoin",
+    "symbol": "BTC",
+	"qtd_upvote": 1000,
+	"qtd_downvote": 1,
+	"sum": 999,
+	"sum_absolute": 999
+}, {
+	"name": "Ethereum",
+    "symbol": "ETH",
+	"qtd_upvote": 5,
+	"qtd_downvote": 15,
+	"sum": -10,
+	"sum_absolute": 10
+}]`)
+
 var JsonOutData = []byte(`[{
     "name": "Bitcoin",
     "symbol": "BTC",
