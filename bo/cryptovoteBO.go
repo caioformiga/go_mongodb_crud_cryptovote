@@ -326,7 +326,7 @@ func (bo CryptoVoteBO) AddDownVote(filterCryptoVote model.FilterCryptoVote) (mod
 		return retrievedCryptoVote, err
 	}
 
-	// perform math before send data do DAO object
+	// perform calculation before send data do DAO object
 	if !retrievedCryptoVote.Id.IsZero() {
 		newQtd_Downvote := retrievedCryptoVote.Qtd_Downvote + 1
 		newSum := retrievedCryptoVote.Qtd_Upvote - newQtd_Downvote
@@ -372,23 +372,16 @@ func (bo CryptoVoteBO) updateVote(retrievedCryptoVote model.CryptoVote, typeVote
 func (bo CryptoVoteBO) SumaryAllCryptoVote(pageSize int64) ([]model.SumaryCryptoVote, error) {
 	var sumaryCryptoVotes []model.SumaryCryptoVote
 	var retrievedCryptoVotes []model.CryptoVote
-	var filterCryptoVote model.FilterCryptoVote
-	const ZERO int64 = 0
-	var defaultPageSize int64 = 10
 	var err error
 
+	const ZERO int64 = 0
+	const DEFAULT_PAGE_SIZE int64 = 10
 	if pageSize == ZERO {
 		// uses default value = 10
-		pageSize = defaultPageSize
+		pageSize = DEFAULT_PAGE_SIZE
 	}
 
-	// if nil, use empty filter
-	filterCryptoVote = model.FilterCryptoVote{
-		Name:   "",
-		Symbol: "",
-	}
-
-	filter, err := utils.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
+	filter, err := utils.MarshalFilterCryptoVoteToBsonFilter(utils.LoadOneNewEmptyFilterCryptoVote())
 	if err != nil {
 		return sumaryCryptoVotes, err
 	}
