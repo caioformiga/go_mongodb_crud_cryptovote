@@ -52,7 +52,6 @@ func TestSumaryAllCryptoVoteMinPageSize(t *testing.T) {
 	var err error
 
 	const MIN_PAGE_SIZE int64 = 2
-	const DEFAULT_PAGE_SIZE int64 = 10
 
 	boInstance, mockDAO = ConfigBOmockedDAO(t)
 	if mockDAO != nil {
