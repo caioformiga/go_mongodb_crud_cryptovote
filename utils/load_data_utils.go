@@ -23,8 +23,8 @@ func LoadOneNewEmptyFilterCryptoVote() model.FilterCryptoVote {
 func LoadOneNewFilterCryptoVoteFromArgs(name string, symbol string) model.FilterCryptoVote {
 
 	var filterCryptoVote model.FilterCryptoVote = model.FilterCryptoVote{
-		Name:   "Klever",
-		Symbol: "KLV",
+		Name:   name,
+		Symbol: symbol,
 	}
 
 	return filterCryptoVote
