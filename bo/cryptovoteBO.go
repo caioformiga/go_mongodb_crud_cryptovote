@@ -3,7 +3,6 @@ package bo
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/caioformiga/go_mongodb_crud_cryptovote/dao"
@@ -241,6 +240,7 @@ func (bo CryptoVoteBO) UpdateOneCryptoVoteByFilter(filterCryptoVote model.Filter
 	}
 */
 func (bo CryptoVoteBO) DeleteAllCryptoVoteByFilter(filterCryptoVote model.FilterCryptoVote) (int64, error) {
+	var filter = bson.M{}
 	var deletedCount int64 = 0
 	var err error
 
@@ -249,9 +249,17 @@ func (bo CryptoVoteBO) DeleteAllCryptoVoteByFilter(filterCryptoVote model.Filter
 	filterCryptoVote.Symbol = strings.ToUpper(strings.TrimSpace(filterCryptoVote.Symbol))
 
 	// continues if at least one of the filters is not empty
+	var validate bool = false
 	if validateCryptoVoteArgumentNotEmpty(filterCryptoVote.Name) || validateCryptoVoteArgumentNotEmpty(filterCryptoVote.Symbol) {
+		validate = true
+	} else {
+		z := "[cryptovote.validation] at least on filter shouldn't be empty"
+		err = errors.New(z)
+		return deletedCount, err
+	}
 
-		filter, err := utils.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
+	if validate {
+		filter, err = utils.MarshalFilterCryptoVoteToBsonFilter(filterCryptoVote)
 		if err != nil {
 			return deletedCount, err
 		}
@@ -260,13 +268,9 @@ func (bo CryptoVoteBO) DeleteAllCryptoVoteByFilter(filterCryptoVote model.Filter
 		deletedCount, err = bo.ImplDAO.DeleteMany(filter)
 		if err != nil {
 			z := "Problems using bo.cryptoVoteDAO.DeleteMany: " + err.Error()
-			log.Print(z)
+			err = errors.New(z)
 			return deletedCount, err
 		}
-	} else {
-		z := "[cryptovote.validation] at least on filter shouldn't be empty: " + err.Error()
-		err = errors.New(z)
-		return deletedCount, err
 	}
 	return deletedCount, err
 }
@@ -280,7 +284,7 @@ func (bo CryptoVoteBO) DeleteAllCryptoVote() (int64, error) {
 	deletedCount, err = bo.ImplDAO.DeleteMany(filter)
 	if err != nil {
 		z := "Problems using bo.cryptoVoteDAO.DeleteMany: " + err.Error()
-		log.Print(z)
+		err = errors.New(z)
 		return deletedCount, err
 	}
 	return deletedCount, err
